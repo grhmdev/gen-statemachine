@@ -1,0 +1,9 @@
+@startuml
+
+state "System Enabled" as enabled
+state "System Disabled" as disabled
+
+[*] --> disabled
+disabled -> enabled : Switch on
+
+@enduml
