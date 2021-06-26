@@ -63,10 +63,16 @@ class TokenType(Enum):
     # Production rules / "sentences"
     # state Disabled
     state_declaration = auto()
+    # state "Powered On" as ON
+    state_alias_declaration = auto()
+    # Enabled : it is on
+    state_label = auto()
     # Enabled --> Disabled
     state_transition = auto()
     # note right of Disabled
-    note_declaration = auto()
+    anchored_note_declaration = auto()
+    # note "What is this?" as Note1
+    floating_note_declaration = auto()
 
     def __str__(self):
         return self.name
@@ -82,7 +88,7 @@ patterns = {
     TokenType.INITIAL_FINAL_STATE: r"^\[\*\]\Z",
     TokenType.ARROW: r"^-(up|down|left|right)?(\[.*\])?->\Z",
     TokenType.NAME: r"^[a-zA-Z0-9_]+\Z",
-    TokenType.LABEL: r"^(?! )[a-zA-Z0-9 ]+\Z",
+    TokenType.LABEL: r"^(?! )[a-zA-Z0-9 ?!,.\(\)\\/]+\Z",
     TokenType.COLON: r"^:\Z",
     TokenType.OPEN_CURLY_BRACKET: r"^{\Z",
     TokenType.CLOSE_CURLY_BRACKET: r"^}\Z",

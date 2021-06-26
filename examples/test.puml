@@ -1,16 +1,15 @@
 @startuml
 
-state enabled
-state disabled
+state ok {
+    ok : is it?
+}
 
-note left of enabled : test
+state Enabled : it is on
 
-note right of enabled
-    test 1
-    test 2
+Enabled : what does this do
 
-end note
+note "hello" as Note1
 
-note "this is a note" as N1
+state "Powered On" as ON
 
 @enduml

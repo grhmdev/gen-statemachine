@@ -29,13 +29,22 @@ class Node:
             s += "\n" + child.to_str(depth + 1)
         return s
 
+class RootNode(Node):
+    def __init__(self): super().__init__(None)
+
+    def to_str(self):
+        s = "root\n"
+        for child in self.children:
+            s += f"{child.to_str(1)}\n"
+        return s
+
 
 class ParseTree:
     def __init__(self):
-        self.root_node = Node(None)
+        self.root_node = RootNode()
 
     def __str__(self):
-        return self.root_node.to_str(0)
+        return self.root_node.to_str()
 
 
 class ParseError(RuntimeError):
@@ -110,7 +119,7 @@ class Parser:
             elif token.type is TokenType.KEYWORD_NOTE:
                 self.parse_note_declaration(self.parse_tree.root_node, token)
             elif token.type in [TokenType.INITIAL_FINAL_STATE, TokenType.NAME]:
-                self.parse_state_transition(self.parse_tree.root_node, token)
+                self.parse_state_transition_or_state_label(self.parse_tree.root_node, token)
 
         return self.parse_tree
 
@@ -134,7 +143,18 @@ class Parser:
 
         return next_token
 
-    def parse_state_declaration(self, parent_node, first_token):
+    def parse_state_transition_or_state_label(self, parent_node: Node, first_token: Token):
+        # Look for arrow or colon to determine production rule
+        second_token = self.find_tokens(
+            tokens_to_find=[TokenType.ARROW, TokenType.COLON],
+            tokens_to_skip=[TokenType.WHITESPACE],
+        )
+        if second_token.type is TokenType.ARROW:
+            self.parse_state_transition(parent_node, first_token, second_token)
+        else:
+            self.parse_state_label(parent_node, first_token, second_token)
+
+    def parse_state_declaration(self, parent_node: Node, first_token: Token):
         LOGGER.debug("start of state_declaration")
 
         # Create node for production rule
@@ -153,6 +173,8 @@ class Parser:
         )
 
         if next_token.type is TokenType.QUOTATION:
+            state_token.type = TokenType.state_alias_declaration
+
             next_token = self.find_tokens(
                 tokens_to_find=[TokenType.LABEL], tokens_to_skip=[TokenType.WHITESPACE]
             )
@@ -180,9 +202,9 @@ class Parser:
             )
         else:
             state_node.make_child(next_token)
-            # Look for {, or newline
+            # Look for {, :, or newline
             next_token = self.find_tokens(
-                tokens_to_find=[TokenType.OPEN_CURLY_BRACKET, TokenType.NEWLINE],
+                tokens_to_find=[TokenType.OPEN_CURLY_BRACKET, TokenType.COLON, TokenType.NEWLINE],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
 
@@ -203,27 +225,28 @@ class Parser:
                     elif next_token.type is TokenType.CLOSE_CURLY_BRACKET:
                         break
                     else:
-                        self.parse_state_transition(state_node, next_token)
+                        self.parse_state_transition_or_state_label(state_node, next_token)
+            elif next_token.type is TokenType.COLON:
+                # Look for label
+                next_token = self.find_tokens(
+                    tokens_to_find=[TokenType.LABEL],
+                    tokens_to_skip=[TokenType.WHITESPACE],
+                )
+                state_node.make_child(next_token)
 
         LOGGER.debug("end of state_declaration")
 
-    def parse_state_transition(self, parent_node, first_token):
+    def parse_state_transition(self, parent_node: Node, name_token: Token, arrow_token: Token):
         LOGGER.debug("start of state_transition")
         # Create node for production rule
         transition_token = Token(
-            type=TokenType.state_transition, start_line=first_token.start_line
+            type=TokenType.state_transition, start_line=name_token.start_line
         )
         transition_node = parent_node.make_child(transition_token)
 
-        # Add the first token
-        transition_node.make_child(first_token)
-
-        # Look for <--, or --> token
-        next_token = self.find_tokens(
-            tokens_to_find=[TokenType.ARROW],
-            tokens_to_skip=[TokenType.WHITESPACE],
-        )
-        transition_node.make_child(next_token)
+        # Add the first tokens
+        transition_node.make_child(name_token)
+        transition_node.make_child(arrow_token)
 
         # Look for [*] or name token
         next_token = self.find_tokens(
@@ -251,11 +274,11 @@ class Parser:
 
         LOGGER.debug("end of state_transition")
 
-    def parse_note_declaration(self, parent_node, first_token):
+    def parse_note_declaration(self, parent_node: Node, first_token: Token):
         LOGGER.debug("start of note_declaration")
         # Create node for production rule
         note_token = Token(
-            type=TokenType.note_declaration, start_line=first_token.start_line
+            type=TokenType.anchored_note_declaration, start_line=first_token.start_line
         )
         note_node = parent_node.make_child(note_token)
 
@@ -273,6 +296,8 @@ class Parser:
         )
 
         if next_token.type is TokenType.QUOTATION:
+            note_token.type = TokenType.floating_note_declaration
+
             # Look for label
             next_token = self.find_tokens(
                 tokens_to_find=[TokenType.LABEL],
@@ -342,3 +367,25 @@ class Parser:
                         note_node.make_child(next_token)
 
         LOGGER.debug("end of note_declaration")
+
+    def parse_state_label(self, parent_node: Node, name_token: Token, colon_token: Token):
+        LOGGER.debug("start of state_label")
+        # Create node for production rule
+        state_label_token = Token(
+            type=TokenType.state_label, start_line=name_token.start_line
+        )
+        state_label_node = parent_node.make_child(state_label_token)
+
+        # Add the first tokens
+        state_label_node.make_child(name_token)
+        state_label_node.make_child(colon_token)
+
+        # Look for label
+        next_token = self.find_tokens(
+            tokens_to_find=[TokenType.LABEL],
+            tokens_to_skip=[TokenType.WHITESPACE],
+        )
+        state_label_node.make_child(next_token)
+
+        LOGGER.debug("end of state_label")
+
