@@ -3,7 +3,7 @@
 state "System Enabled" as enabled
 state "System Disabled" as disabled
 
-[*] --> disabled
-disabled -> enabled : Switch on
+[*] -up-> disabled
+disabled -right[dotted,#blue]-> enabled : Switch on
 
 @enduml

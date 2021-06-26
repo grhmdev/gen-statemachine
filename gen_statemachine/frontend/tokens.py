@@ -48,20 +48,20 @@ class TokenType(Enum):
 
 
 patterns = {
-    TokenType.WHITESPACE: "^[ \t]+\Z",
-    TokenType.NEWLINE: "^[\n]+\Z",
-    TokenType.KEYWORD_STATE: "^state\Z",
-    TokenType.KEYWORD_START: "^@startuml\Z",
-    TokenType.KEYWORD_END: "^@enduml\Z",
-    TokenType.KEYWORD_AS: "^as\Z",
-    TokenType.INITIAL_FINAL_STATE: "^\[\*\]\Z",
-    TokenType.ARROW: "^(-)+>\Z",
-    TokenType.NAME: "^[a-zA-Z0-9_]+\Z",
-    TokenType.LABEL: "^[a-zA-Z0-9 ]+\Z",
-    TokenType.COLON: "^:\Z",
-    TokenType.OPEN_CURLY_BRACKET: "^{\Z",
-    TokenType.CLOSE_CURLY_BRACKET: "^}\Z",
-    TokenType.QUOTATION: '^"\Z',
+    TokenType.WHITESPACE: r"^[ \t]+\Z",
+    TokenType.NEWLINE: r"^[\n]+\Z",
+    TokenType.KEYWORD_STATE: r"^state\Z",
+    TokenType.KEYWORD_START: r"^@startuml\Z",
+    TokenType.KEYWORD_END: r"^@enduml\Z",
+    TokenType.KEYWORD_AS: r"^as\Z",
+    TokenType.INITIAL_FINAL_STATE: r"^\[\*\]\Z",
+    TokenType.ARROW: r"^-(up|down|left|right)?(\[.*\])?->\Z",
+    TokenType.NAME: r"^[a-zA-Z0-9_]+\Z",
+    TokenType.LABEL: r"^[a-zA-Z0-9 ]+\Z",
+    TokenType.COLON: r"^:\Z",
+    TokenType.OPEN_CURLY_BRACKET: r"^{\Z",
+    TokenType.CLOSE_CURLY_BRACKET: r"^}\Z",
+    TokenType.QUOTATION: r'^"\Z',
 }
 
 
