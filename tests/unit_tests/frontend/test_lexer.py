@@ -27,7 +27,7 @@ class TestLexer(TestCaseBase):
         """Test EOF token is returned at end of file"""
         self.look_for_token(
             file_contents="\n@startuml",
-            tokens_to_find=[TokenType.KEYWORD_START],
+            tokens_to_find=[TokenType.KEYWORD_START_UML],
             tokens_to_skip=[],
             expected_result=Token(TokenType.EOF, 1, 1, "\n@startuml"),
         )
@@ -36,7 +36,7 @@ class TestLexer(TestCaseBase):
         """Test EOF token is returned at end of file"""
         self.look_for_token(
             file_contents=" ",
-            tokens_to_find=[TokenType.KEYWORD_START],
+            tokens_to_find=[TokenType.KEYWORD_START_UML],
             tokens_to_skip=[TokenType.WHITESPACE],
             expected_result=Token(TokenType.EOF, 1, 2, ""),
         )
@@ -46,9 +46,9 @@ class TestLexer(TestCaseBase):
         token_text = "@startuml"
         self.look_for_token(
             file_contents=token_text,
-            tokens_to_find=[TokenType.KEYWORD_START],
+            tokens_to_find=[TokenType.KEYWORD_START_UML],
             tokens_to_skip=[],
-            expected_result=Token(TokenType.KEYWORD_START, 1, 1, token_text),
+            expected_result=Token(TokenType.KEYWORD_START_UML, 1, 1, token_text),
         )
 
     def test_token_found_with_skip(self):
@@ -56,9 +56,9 @@ class TestLexer(TestCaseBase):
         token_text = "@startuml"
         self.look_for_token(
             file_contents=f"      {token_text}",
-            tokens_to_find=[TokenType.KEYWORD_START],
+            tokens_to_find=[TokenType.KEYWORD_START_UML],
             tokens_to_skip=[TokenType.WHITESPACE],
-            expected_result=Token(TokenType.KEYWORD_START, 1, 7, token_text),
+            expected_result=Token(TokenType.KEYWORD_START_UML, 1, 7, token_text),
         )
 
     def test_token_precedence(self):

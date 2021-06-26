@@ -9,7 +9,7 @@ format:
 	poetry run python -m black tests/*
 
 lint:
-	poetry run python -m mypy gen_statemachine/
+	poetry run python -m mypy gen_statemachine/ --ignore-missing-imports
 
 diagrams:
 	plantuml examples/*

@@ -1,9 +1,16 @@
 @startuml
 
-state "System Enabled" as enabled
-state "System Disabled" as disabled
+state enabled
+state disabled
 
-[*] -up-> disabled
-disabled -right[dotted,#blue]-> enabled : Switch on
+note left of enabled : test
+
+note right of enabled
+    test 1
+    test 2
+
+end note
+
+note "this is a note" as N1
 
 @enduml

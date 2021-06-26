@@ -34,6 +34,7 @@ The following language features are supported but will be ignored by the tool an
 
 - Sub-state history: [H], [H*]
 - Forks and concurrent state
+- Notes on links, e.g. `note on link`
 
 ## Usage
 

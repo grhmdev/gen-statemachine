@@ -74,7 +74,7 @@ class Parser:
 
         # Find @startuml to begin parsing
         start_token = self.find_tokens(
-            tokens_to_find=[TokenType.KEYWORD_START],
+            tokens_to_find=[TokenType.KEYWORD_START_UML],
             tokens_to_skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
         )
         self.parse_tree.root_node.make_child(start_token)
@@ -88,8 +88,9 @@ class Parser:
             token = self.lexer.look_for_tokens(
                 skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
                 take=[
-                    TokenType.KEYWORD_END,
+                    TokenType.KEYWORD_END_UML,
                     TokenType.KEYWORD_STATE,
+                    TokenType.KEYWORD_NOTE,
                     TokenType.INITIAL_FINAL_STATE,
                     TokenType.NAME,
                 ],
@@ -101,27 +102,15 @@ class Parser:
             elif token.type is TokenType.EOF:
                 LOGGER.warning("End-of-file found before closing @enduml")
                 break
-            elif token.type is TokenType.KEYWORD_STATE:
-                self.parse_state_declaration(self.parse_tree.root_node, token)
-            elif token.type is TokenType.KEYWORD_END:
+            elif token.type is TokenType.KEYWORD_END_UML:
                 self.parse_tree.root_node.make_child(token)
                 end_token_found = True
+            elif token.type is TokenType.KEYWORD_STATE:
+                self.parse_state_declaration(self.parse_tree.root_node, token)
+            elif token.type is TokenType.KEYWORD_NOTE:
+                self.parse_note_declaration(self.parse_tree.root_node, token)
             elif token.type in [TokenType.INITIAL_FINAL_STATE, TokenType.NAME]:
                 self.parse_state_transition(self.parse_tree.root_node, token)
-            elif token.type is TokenType.KEYWORD_STATE:
-                pass
-            elif token.type is TokenType.KEYWORD_STATE:
-                pass
-            elif token.type is TokenType.KEYWORD_STATE:
-                pass
-            elif token.type is TokenType.KEYWORD_STATE:
-                pass
-            elif token.type is TokenType.KEYWORD_STATE:
-                pass
-            elif token.type is TokenType.KEYWORD_STATE:
-                pass
-            elif token.type is TokenType.KEYWORD_STATE:
-                pass
 
         return self.parse_tree
 
@@ -261,3 +250,95 @@ class Parser:
         transition_node.make_child(next_token)
 
         LOGGER.debug("end of state_transition")
+
+    def parse_note_declaration(self, parent_node, first_token):
+        LOGGER.debug("start of note_declaration")
+        # Create node for production rule
+        note_token = Token(
+            type=TokenType.note_declaration, start_line=first_token.start_line
+        )
+        note_node = parent_node.make_child(note_token)
+
+        # Add the first token
+        note_node.make_child(first_token)
+
+        # Look for "left of", "right of" or quotation
+        next_token = self.find_tokens(
+            tokens_to_find=[
+                TokenType.KEYWORD_LEFT_OF,
+                TokenType.KEYWORD_RIGHT_OF,
+                TokenType.QUOTATION,
+            ],
+            tokens_to_skip=[TokenType.WHITESPACE],
+        )
+
+        if next_token.type is TokenType.QUOTATION:
+            # Look for label
+            next_token = self.find_tokens(
+                tokens_to_find=[TokenType.LABEL],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+            note_node.make_child(next_token)
+
+            # Look for end quotation
+            next_token = self.find_tokens(
+                tokens_to_find=[TokenType.QUOTATION],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+
+            # Look for "as"
+            next_token = self.find_tokens(
+                tokens_to_find=[TokenType.KEYWORD_AS],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+            note_node.make_child(next_token)
+
+            # Look for note name
+            next_token = self.find_tokens(
+                tokens_to_find=[TokenType.NAME],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+            note_node.make_child(next_token)
+        else:
+            note_node.make_child(next_token)
+
+            # Look for state name
+            next_token = self.find_tokens(
+                tokens_to_find=[TokenType.NAME],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+            note_node.make_child(next_token)
+
+            # Look for colon or newline
+            next_token = self.find_tokens(
+                tokens_to_find=[TokenType.COLON, TokenType.NEWLINE],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+
+            if next_token.type is TokenType.COLON:
+                note_node.make_child(next_token)
+
+                # Look for label
+                next_token = self.find_tokens(
+                    tokens_to_find=[TokenType.LABEL],
+                    tokens_to_skip=[TokenType.WHITESPACE],
+                )
+                note_node.make_child(next_token)
+            else:
+                while True:
+                    # Look for labels or end note
+                    next_token = self.find_tokens(
+                        tokens_to_find=[TokenType.KEYWORD_END, TokenType.LABEL],
+                        tokens_to_skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
+                    )
+
+                    if next_token.type is TokenType.KEYWORD_END:
+                        self.find_tokens(
+                            tokens_to_find=[TokenType.KEYWORD_NOTE],
+                            tokens_to_skip=[TokenType.WHITESPACE],
+                        )
+                        break
+                    else:
+                        note_node.make_child(next_token)
+
+        LOGGER.debug("end of note_declaration")
