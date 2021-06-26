@@ -11,28 +11,26 @@ This tool generates statemachines from PlantUML's state diagrams.
 - States and sub-states
 - State transitions
 - State aliasing
+- Notes
 
 *TODO*
-
-- Notes
 - State inputs and outputs: Entry/exit points, input/output pins, expansion input/outputs
 - Stereotypes
-- Conditional
+- Conditionals
 
-The following language features are supported but will be ignored by the tool and not have an impact on the generated outputs.
+The following language features are supported but will be ignored by the tool and will not have an impact on the generated outputs.
 
-*TODO*
-
-- `<style>..</style>` sections
-- skinparam
-- State colours and colour transitions
-- Directional and coloured transition arrow styles
 - Arrow directions
 - Arrow line color and style
 
+*TODO*
+- `<style>..</style>` sections
+- `skinparam`
+- State colours and colour transitions
+
 ## Unsupported language
 
-- Sub-state history: [H], [H*]
+- Sub-state history, e.g. `[H], [H*]`
 - Forks and concurrent state
 - Notes on links, e.g. `note on link`
 
