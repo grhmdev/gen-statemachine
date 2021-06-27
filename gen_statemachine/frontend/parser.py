@@ -29,8 +29,10 @@ class Node:
             s += "\n" + child.to_str(depth + 1)
         return s
 
+
 class RootNode(Node):
-    def __init__(self): super().__init__(None)
+    def __init__(self):
+        super().__init__(None)
 
     def to_str(self):
         s = "root\n"
@@ -119,7 +121,9 @@ class Parser:
             elif token.type is TokenType.KEYWORD_NOTE:
                 self.parse_note_declaration(self.parse_tree.root_node, token)
             elif token.type in [TokenType.INITIAL_FINAL_STATE, TokenType.NAME]:
-                self.parse_state_transition_or_state_label(self.parse_tree.root_node, token)
+                self.parse_state_transition_or_state_label(
+                    self.parse_tree.root_node, token
+                )
 
         return self.parse_tree
 
@@ -143,7 +147,9 @@ class Parser:
 
         return next_token
 
-    def parse_state_transition_or_state_label(self, parent_node: Node, first_token: Token):
+    def parse_state_transition_or_state_label(
+        self, parent_node: Node, first_token: Token
+    ):
         # Look for arrow or colon to determine production rule
         second_token = self.find_tokens(
             tokens_to_find=[TokenType.ARROW, TokenType.COLON],
@@ -197,16 +203,54 @@ class Parser:
             state_node.make_child(next_token)
 
             next_token = self.find_tokens(
-                tokens_to_find=[TokenType.NEWLINE],
+                tokens_to_find=[TokenType.STEREOTYPE_ANY, TokenType.NEWLINE],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
+
+            if next_token.type is TokenType.STEREOTYPE_ANY:
+                state_node.make_child(next_token)
         else:
             state_node.make_child(next_token)
-            # Look for {, :, or newline
+            # Look for stereotype, {, :, or newline
             next_token = self.find_tokens(
-                tokens_to_find=[TokenType.OPEN_CURLY_BRACKET, TokenType.COLON, TokenType.NEWLINE],
+                tokens_to_find=[
+                    TokenType.STEREOTYPE_CHOICE,
+                    TokenType.STEREOTYPE_END,
+                    TokenType.STEREOTYPE_ENTRY_POINT,
+                    TokenType.STEREOTYPE_EXIT_POINT,
+                    TokenType.STEREOTYPE_INPUT_PIN,
+                    TokenType.STEREOTYPE_OUTPUT_PIN,
+                    TokenType.STEREOTYPE_EXPANSION_INPUT,
+                    TokenType.STEREOTYPE_EXPANSION_OUTPUT,
+                    TokenType.STEREOTYPE_ANY,
+                    TokenType.OPEN_CURLY_BRACKET,
+                    TokenType.COLON,
+                    TokenType.NEWLINE,
+                ],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
+
+            if next_token.type in [
+                TokenType.STEREOTYPE_CHOICE,
+                TokenType.STEREOTYPE_END,
+                TokenType.STEREOTYPE_ENTRY_POINT,
+                TokenType.STEREOTYPE_EXIT_POINT,
+                TokenType.STEREOTYPE_INPUT_PIN,
+                TokenType.STEREOTYPE_OUTPUT_PIN,
+                TokenType.STEREOTYPE_EXPANSION_INPUT,
+                TokenType.STEREOTYPE_EXPANSION_OUTPUT,
+                TokenType.STEREOTYPE_ANY,
+            ]:
+                state_node.make_child(next_token)
+                # Look for {, :, or newline
+                next_token = self.find_tokens(
+                    tokens_to_find=[
+                        TokenType.OPEN_CURLY_BRACKET,
+                        TokenType.COLON,
+                        TokenType.NEWLINE,
+                    ],
+                    tokens_to_skip=[TokenType.WHITESPACE],
+                )
 
             if next_token.type is TokenType.OPEN_CURLY_BRACKET:
                 # Look for nested state declarations and state transitions
@@ -225,7 +269,9 @@ class Parser:
                     elif next_token.type is TokenType.CLOSE_CURLY_BRACKET:
                         break
                     else:
-                        self.parse_state_transition_or_state_label(state_node, next_token)
+                        self.parse_state_transition_or_state_label(
+                            state_node, next_token
+                        )
             elif next_token.type is TokenType.COLON:
                 # Look for label
                 next_token = self.find_tokens(
@@ -236,7 +282,9 @@ class Parser:
 
         LOGGER.debug("end of state_declaration")
 
-    def parse_state_transition(self, parent_node: Node, name_token: Token, arrow_token: Token):
+    def parse_state_transition(
+        self, parent_node: Node, name_token: Token, arrow_token: Token
+    ):
         LOGGER.debug("start of state_transition")
         # Create node for production rule
         transition_token = Token(
@@ -265,12 +313,22 @@ class Parser:
             # End of state transition
             return
 
-        # Look for a label
+        # Look for [condition] or label
         next_token = self.find_tokens(
-            tokens_to_find=[TokenType.LABEL],
+            tokens_to_find=[TokenType.CONDITION, TokenType.LABEL],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
         transition_node.make_child(next_token)
+
+        if next_token.type is TokenType.CONDITION:
+            # Look for label or newline
+            next_token = self.find_tokens(
+                tokens_to_find=[TokenType.LABEL, TokenType.NEWLINE],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+
+        if next_token.type is TokenType.LABEL:
+            transition_node.make_child(next_token)
 
         LOGGER.debug("end of state_transition")
 
@@ -368,7 +426,9 @@ class Parser:
 
         LOGGER.debug("end of note_declaration")
 
-    def parse_state_label(self, parent_node: Node, name_token: Token, colon_token: Token):
+    def parse_state_label(
+        self, parent_node: Node, name_token: Token, colon_token: Token
+    ):
         LOGGER.debug("start of state_label")
         # Create node for production rule
         state_label_token = Token(
@@ -388,4 +448,3 @@ class Parser:
         state_label_node.make_child(next_token)
 
         LOGGER.debug("end of state_label")
-

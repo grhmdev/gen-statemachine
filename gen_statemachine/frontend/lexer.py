@@ -181,4 +181,7 @@ class Lexer:
         self, token: TokenType, text: str
     ) -> Optional[Match[str]]:
         """Returns `True` if the text wholly matches the pattern for this token type"""
-        return self.compiled_patterns[token].match(text)
+        if token in self.compiled_patterns:
+            return self.compiled_patterns[token].match(text)
+        else:
+            raise RuntimeError(f"No pattern stored for {token} token type")

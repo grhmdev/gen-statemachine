@@ -33,6 +33,8 @@ class TokenType(Enum):
     NAME = auto()
     # this is a label
     LABEL = auto()
+    # [a > b]
+    CONDITION = auto()
     # :
     COLON = auto()
     # {
@@ -89,6 +91,7 @@ patterns = {
     TokenType.ARROW: r"^-(up|down|left|right)?(\[.*\])?->\Z",
     TokenType.NAME: r"^[a-zA-Z0-9_]+\Z",
     TokenType.LABEL: r"^(?! )[a-zA-Z0-9 ?!,.\(\)\\/]+\Z",
+    TokenType.CONDITION: r"^\[.+\]\Z",
     TokenType.COLON: r"^:\Z",
     TokenType.OPEN_CURLY_BRACKET: r"^{\Z",
     TokenType.CLOSE_CURLY_BRACKET: r"^}\Z",
@@ -97,6 +100,15 @@ patterns = {
     TokenType.KEYWORD_LEFT_OF: r"^left of\Z",
     TokenType.KEYWORD_RIGHT_OF: r"^right of\Z",
     TokenType.KEYWORD_END: r"^end\Z",
+    TokenType.STEREOTYPE_ANY: r"^<<.+>>\Z",
+    TokenType.STEREOTYPE_CHOICE: r"^<<choice>>\Z",
+    TokenType.STEREOTYPE_END: r"^<<end>>\Z",
+    TokenType.STEREOTYPE_ENTRY_POINT: r"^<<entryPoint>>\Z",
+    TokenType.STEREOTYPE_EXIT_POINT: r"^<<exitPoint>>\Z",
+    TokenType.STEREOTYPE_INPUT_PIN: r"^<<inputPin>>\Z",
+    TokenType.STEREOTYPE_OUTPUT_PIN: r"^<<outputPin>>\Z",
+    TokenType.STEREOTYPE_EXPANSION_INPUT: r"^<<expansionInput>>\Z",
+    TokenType.STEREOTYPE_EXPANSION_OUTPUT: r"^<<expansionOutput>>\Z",
 }
 
 

@@ -1,4 +1,4 @@
-# PlantUML Statemachine Code Generator
+# State Machine Code Generator
 
 This tool generates statemachines from PlantUML's state diagrams.
 
@@ -12,11 +12,12 @@ This tool generates statemachines from PlantUML's state diagrams.
 - State transitions
 - State aliasing
 - Notes
-
-*TODO*
+- Conditionals
 - State inputs and outputs: Entry/exit points, input/output pins, expansion input/outputs
 - Stereotypes
-- Conditionals
+
+*TODO*
+- Comments
 
 The following language features are supported but will be ignored by the tool and will not have an impact on the generated outputs.
 
@@ -27,6 +28,12 @@ The following language features are supported but will be ignored by the tool an
 - `<style>..</style>` sections
 - `skinparam`
 - State colours and colour transitions
+- Captions
+- Legends
+- `scale`
+- Title
+- Header/footer
+
 
 ## Unsupported language
 

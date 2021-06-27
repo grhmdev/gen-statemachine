@@ -1,0 +1,59 @@
+@startuml
+
+state STATE1
+state STATE2 <<stereotype>>
+state STATE3 : State 3
+state STATE4 <<stereotype>> : State 4
+
+STATE1 : State 1
+
+state STATE4 {
+    state STATE5 <<end>>
+    state STATE6 <<stereotype>>
+    state STATE7 : State 7
+    state STATE8 <<stereotype>> : State 8
+    state STATE9 {
+
+    }
+    state STATE10 {
+        state STATE11
+        STATE1 --> STATE11
+    }
+}
+state STATE12 {
+
+}
+
+[*] -right-> STATE1
+STATE1 -left-> STATE2
+STATE2 -up-> STATE3
+STATE4 -down-> STATE5
+STATE2 --> [*]
+
+state STATE13 <<choice>> : this is a choice
+STATE13 --> STATE4 : [else]
+STATE13 --> STATE3 : [a > b] text here too
+
+state STATE14 {
+    state ENTRY <<entryPoint>> : text here too
+    state EXIT <<exitPoint>>
+    state IN_PIN <<inputPin>> : text here too
+    state OUT_PIN <<outputPin>>
+    state EXP_IN <<expansionInput>> : text here too
+    state EXP_OUT <<expansionOutput>>
+}
+
+note right of STATE14 : this is state 14
+note left of STATE14: this is state 14
+note right of STATE12
+    this is state 12
+    .
+end note
+note left of STATE12
+    this is state 12
+
+end note
+
+note "this note is lost" as N1
+
+@enduml

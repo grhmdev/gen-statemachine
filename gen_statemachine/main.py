@@ -14,7 +14,7 @@ class Program:
 
     def run(self):
         # TODO: Parse args
-        file_path = Path(os.getcwd()) / "examples" / "test.puml"
+        file_path = Path(os.getcwd()) / "examples" / "full_syntax.puml"
 
         with open(file_path, "r") as file:
             try:
