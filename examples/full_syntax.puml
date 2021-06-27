@@ -43,6 +43,9 @@ state STATE14 {
     state EXP_OUT <<expansionOutput>>
 }
 
+state "State 15" as STATE15 <<stereotype>>
+state "State 16" as STATE16
+
 note right of STATE14 : this is state 14
 note left of STATE14: this is state 14
 note right of STATE12

@@ -1,15 +1,16 @@
-from copy import deepcopy
+from re import S
 from typing import TextIO, List, Callable, NewType, Optional
+from dataclasses import dataclass, field
 
 from .lexer import LOGGER, Lexer
 from .tokens import Token, TokenType
 
 
+@dataclass
 class Node:
-    def __init__(self, token: Token):
-        self.token = token
-        self.children: List[Node] = []
-        self.parent: Optional[Node] = None
+    token: Token
+    children: List["Node"] = field(default_factory=list)
+    parent: Optional["Node"] = None
 
     def make_child(self, token: Token) -> "Node":
         assert type(token) is Token
@@ -29,7 +30,6 @@ class Node:
             s += "\n" + child.to_str(depth + 1)
         return s
 
-
 class RootNode(Node):
     def __init__(self):
         super().__init__(None)
@@ -40,21 +40,19 @@ class RootNode(Node):
             s += f"{child.to_str(1)}\n"
         return s
 
-
+@dataclass
 class ParseTree:
-    def __init__(self):
-        self.root_node = RootNode()
+    root_node = RootNode()
 
     def __str__(self):
         return self.root_node.to_str()
 
-
+@dataclass
 class ParseError(RuntimeError):
-    def __init__(self, error_message: str, file_name=None, line_no=0, column_no=0):
-        self.file_name = file_name
-        self.line_no = line_no
-        self.column_no = column_no
-        self.message = error_message
+    error_message: str
+    file_name: Optional[str] = None
+    line_no: int = 0
+    column_no: int = 0
 
     def __str__(self):
         return f"""

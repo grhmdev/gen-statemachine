@@ -1,5 +1,5 @@
 from enum import Enum, auto
-
+from dataclasses import dataclass
 
 class TokenType(Enum):
     UNKNOWN = auto()
@@ -112,18 +112,12 @@ patterns = {
 }
 
 
+@dataclass
 class Token:
-    def __init__(
-        self,
-        type: TokenType = TokenType.UNKNOWN,
-        start_line: int = 0,
-        start_col: int = 0,
-        text: str = "",
-    ):
-        self.type = type
-        self.start_line = start_line
-        self.start_col = start_col
-        self.text = text
+    type: TokenType = TokenType.UNKNOWN
+    start_line: int = 0
+    start_col: int = 0
+    text: str = ""
 
     def __str__(self) -> str:
         return "{},{},{}".format(
