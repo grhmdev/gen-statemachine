@@ -10,10 +10,11 @@ class TestCaseBase(unittest.TestCase):
 
     def tearDown(self):
         # Remove any files created
-        map(lambda x: x.unlink(), self.test_file_paths)
+        for path in self.test_file_paths:
+            path.unlink()
 
     def create_file(self, name: str = "test.file", contents: str = "") -> Path:
-        path = Path(os.getcwd()) / name
+        path = Path(os.getcwd()) / ".temp" / name
         path.write_text(contents)
         self.test_file_paths.append(path)
         return path

@@ -45,6 +45,12 @@ state STATE14 {
 
 state "State 15" as STATE15 <<stereotype>>
 state "State 16" as STATE16
+state "State 17" as STATE17 <<stereotype>> {
+    state STATE18
+}
+state "State 19" as STATE19 <<stereotype>> {
+    STATE19 : label here
+}
 
 note right of STATE14 : this is state 14
 note left of STATE14: this is state 14

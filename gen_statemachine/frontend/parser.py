@@ -42,7 +42,7 @@ class RootNode(Node):
 
 @dataclass
 class ParseTree:
-    root_node = RootNode()
+    root_node: RootNode = field(default_factory=RootNode)
 
     def __str__(self):
         return self.root_node.to_str()
@@ -62,6 +62,9 @@ class ParseError(RuntimeError):
           {self.message}
         =======================================
         """
+    
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 class Parser:
@@ -73,7 +76,6 @@ class Parser:
     """
 
     def __init__(self):
-        self.root_node = Node(None)
         self.lexer = None
         self.parse_tree = ParseTree()
 
@@ -176,7 +178,9 @@ class Parser:
             tokens_to_skip=[TokenType.WHITESPACE],
         )
 
-        if next_token.type is TokenType.QUOTATION:
+        if next_token.type is TokenType.NAME:
+            state_node.make_child(next_token)
+        else:
             state_token.type = TokenType.state_alias_declaration
 
             next_token = self.find_tokens(
@@ -200,35 +204,9 @@ class Parser:
             )
             state_node.make_child(next_token)
 
-            next_token = self.find_tokens(
-                tokens_to_find=[TokenType.STEREOTYPE_ANY, TokenType.NEWLINE],
-                tokens_to_skip=[TokenType.WHITESPACE],
-            )
-
-            if next_token.type is TokenType.STEREOTYPE_ANY:
-                state_node.make_child(next_token)
-        else:
-            state_node.make_child(next_token)
-            # Look for stereotype, {, :, or newline
-            next_token = self.find_tokens(
-                tokens_to_find=[
-                    TokenType.STEREOTYPE_CHOICE,
-                    TokenType.STEREOTYPE_END,
-                    TokenType.STEREOTYPE_ENTRY_POINT,
-                    TokenType.STEREOTYPE_EXIT_POINT,
-                    TokenType.STEREOTYPE_INPUT_PIN,
-                    TokenType.STEREOTYPE_OUTPUT_PIN,
-                    TokenType.STEREOTYPE_EXPANSION_INPUT,
-                    TokenType.STEREOTYPE_EXPANSION_OUTPUT,
-                    TokenType.STEREOTYPE_ANY,
-                    TokenType.OPEN_CURLY_BRACKET,
-                    TokenType.COLON,
-                    TokenType.NEWLINE,
-                ],
-                tokens_to_skip=[TokenType.WHITESPACE],
-            )
-
-            if next_token.type in [
+        # Look for stereotype, {, :, or newline
+        next_token = self.find_tokens(
+            tokens_to_find=[
                 TokenType.STEREOTYPE_CHOICE,
                 TokenType.STEREOTYPE_END,
                 TokenType.STEREOTYPE_ENTRY_POINT,
@@ -238,45 +216,62 @@ class Parser:
                 TokenType.STEREOTYPE_EXPANSION_INPUT,
                 TokenType.STEREOTYPE_EXPANSION_OUTPUT,
                 TokenType.STEREOTYPE_ANY,
-            ]:
-                state_node.make_child(next_token)
-                # Look for {, :, or newline
+                TokenType.OPEN_CURLY_BRACKET,
+                TokenType.COLON,
+                TokenType.NEWLINE,
+            ],
+            tokens_to_skip=[TokenType.WHITESPACE],
+        )
+
+        if next_token.type in [
+            TokenType.STEREOTYPE_CHOICE,
+            TokenType.STEREOTYPE_END,
+            TokenType.STEREOTYPE_ENTRY_POINT,
+            TokenType.STEREOTYPE_EXIT_POINT,
+            TokenType.STEREOTYPE_INPUT_PIN,
+            TokenType.STEREOTYPE_OUTPUT_PIN,
+            TokenType.STEREOTYPE_EXPANSION_INPUT,
+            TokenType.STEREOTYPE_EXPANSION_OUTPUT,
+            TokenType.STEREOTYPE_ANY,
+        ]:
+            state_node.make_child(next_token)
+            # Look for {, :, or newline
+            next_token = self.find_tokens(
+                tokens_to_find=[
+                    TokenType.OPEN_CURLY_BRACKET,
+                    TokenType.COLON,
+                    TokenType.NEWLINE,
+                ],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+
+        if next_token.type is TokenType.OPEN_CURLY_BRACKET:
+            # Look for nested state declarations and state transitions
+            while True:
                 next_token = self.find_tokens(
                     tokens_to_find=[
-                        TokenType.OPEN_CURLY_BRACKET,
-                        TokenType.COLON,
-                        TokenType.NEWLINE,
+                        TokenType.KEYWORD_STATE,
+                        TokenType.INITIAL_FINAL_STATE,
+                        TokenType.NAME,
+                        TokenType.CLOSE_CURLY_BRACKET,
                     ],
-                    tokens_to_skip=[TokenType.WHITESPACE],
+                    tokens_to_skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
                 )
-
-            if next_token.type is TokenType.OPEN_CURLY_BRACKET:
-                # Look for nested state declarations and state transitions
-                while True:
-                    next_token = self.find_tokens(
-                        tokens_to_find=[
-                            TokenType.KEYWORD_STATE,
-                            TokenType.INITIAL_FINAL_STATE,
-                            TokenType.NAME,
-                            TokenType.CLOSE_CURLY_BRACKET,
-                        ],
-                        tokens_to_skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
+                if next_token.type is TokenType.KEYWORD_STATE:
+                    self.parse_state_declaration(state_node, next_token)
+                elif next_token.type is TokenType.CLOSE_CURLY_BRACKET:
+                    break
+                else:
+                    self.parse_state_transition_or_state_label(
+                        state_node, next_token
                     )
-                    if next_token.type is TokenType.KEYWORD_STATE:
-                        self.parse_state_declaration(state_node, next_token)
-                    elif next_token.type is TokenType.CLOSE_CURLY_BRACKET:
-                        break
-                    else:
-                        self.parse_state_transition_or_state_label(
-                            state_node, next_token
-                        )
-            elif next_token.type is TokenType.COLON:
-                # Look for label
-                next_token = self.find_tokens(
-                    tokens_to_find=[TokenType.LABEL],
-                    tokens_to_skip=[TokenType.WHITESPACE],
-                )
-                state_node.make_child(next_token)
+        elif next_token.type is TokenType.COLON:
+            # Look for label
+            next_token = self.find_tokens(
+                tokens_to_find=[TokenType.LABEL],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+            state_node.make_child(next_token)
 
         LOGGER.debug("end of state_declaration")
 
@@ -397,8 +392,6 @@ class Parser:
             )
 
             if next_token.type is TokenType.COLON:
-                note_node.make_child(next_token)
-
                 # Look for label
                 next_token = self.find_tokens(
                     tokens_to_find=[TokenType.LABEL],
@@ -412,15 +405,15 @@ class Parser:
                         tokens_to_find=[TokenType.KEYWORD_END, TokenType.LABEL],
                         tokens_to_skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
                     )
+                    note_node.make_child(next_token)
 
                     if next_token.type is TokenType.KEYWORD_END:
-                        self.find_tokens(
+                        next_token = self.find_tokens(
                             tokens_to_find=[TokenType.KEYWORD_NOTE],
                             tokens_to_skip=[TokenType.WHITESPACE],
                         )
-                        break
-                    else:
                         note_node.make_child(next_token)
+                        break
 
         LOGGER.debug("end of note_declaration")
 
