@@ -92,6 +92,8 @@ class Parser:
                     TokenType.KEYWORD_END_UML,
                     TokenType.KEYWORD_STATE,
                     TokenType.KEYWORD_NOTE,
+                    TokenType.START_BLOCK_COMMENT,
+                    TokenType.APOSTROPHE,
                     TokenType.INITIAL_FINAL_STATE,
                     TokenType.NAME,
                 ],
@@ -108,6 +110,8 @@ class Parser:
                 end_token_found = True
             elif token.type is TokenType.KEYWORD_STATE:
                 self.parse_state_declaration(self.parse_tree.root_node, token)
+            elif token.type in [TokenType.START_BLOCK_COMMENT, TokenType.APOSTROPHE]:
+                self.parse_comment(self.parse_tree.root_node, token)
             elif token.type is TokenType.KEYWORD_NOTE:
                 self.parse_note_declaration(self.parse_tree.root_node, token)
             elif token.type in [TokenType.INITIAL_FINAL_STATE, TokenType.NAME]:
@@ -242,6 +246,8 @@ class Parser:
                     tokens_to_find=[
                         TokenType.KEYWORD_STATE,
                         TokenType.INITIAL_FINAL_STATE,
+                        TokenType.APOSTROPHE,
+                        TokenType.START_BLOCK_COMMENT,
                         TokenType.NAME,
                         TokenType.CLOSE_CURLY_BRACKET,
                     ],
@@ -251,6 +257,8 @@ class Parser:
                     self.parse_state_declaration(state_node, next_token)
                 elif next_token.type is TokenType.CLOSE_CURLY_BRACKET:
                     break
+                elif next_token.type in [TokenType.START_BLOCK_COMMENT, TokenType.APOSTROPHE]:
+                    self.parse_comment(state_node, next_token)
                 else:
                     self.parse_state_transition_or_state_label(
                         state_node, next_token
@@ -439,3 +447,38 @@ class Parser:
         state_label_node.make_child(next_token)
 
         LOGGER.debug("end of state_label")
+
+    def parse_comment(
+        self, parent_node: Node, first_token: Token
+    ):
+        LOGGER.debug("start of comment")
+        # Create node for production rule
+        comment_token = Token(
+            type=TokenType.comment, start_line=first_token.start_line
+        )
+        comment_node = parent_node.make_child(comment_token)
+
+        # Add the first token
+        comment_node.make_child(first_token)
+
+        if first_token.type is TokenType.APOSTROPHE:
+            # This is a single line comment
+            next_token = self.find_tokens(
+                tokens_to_find=[TokenType.LABEL],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+            comment_node.make_child(next_token)
+        else:
+            # This is a block comment, that could contain newlines
+            while True:
+                next_token = self.find_tokens(
+                    tokens_to_find=[TokenType.END_BLOCK_COMMENT, TokenType.LABEL],
+                    tokens_to_skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
+                )
+                comment_node.make_child(next_token)
+
+                if next_token.type is TokenType.END_BLOCK_COMMENT:
+                    break
+        
+        
+        LOGGER.debug("end of comment")

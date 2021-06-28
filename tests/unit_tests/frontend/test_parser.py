@@ -1042,3 +1042,74 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[1].token.type, TokenType.NAME)
         self.assertEqual(node.children[1].token.text, "STATE1")
         self.assertEqual(node.children[2].token.type, TokenType.STEREOTYPE_EXPANSION_OUTPUT)
+
+    def test_line_comment(self):
+        file_path = self.create_file(contents=dedent(
+        """
+        @startuml
+
+        'hello world
+
+        @enduml
+        """))
+        parser = Parser()
+
+        with open(file_path, "r") as file:
+            parse_tree = parser.parse_puml(file)
+
+        node = parse_tree.root_node.children[1]
+        self.assertEqual(node.token.type, TokenType.comment)
+        self.assertEqual(len(node.children), 2)
+        self.assertEqual(node.children[0].token.type, TokenType.APOSTROPHE)
+        self.assertEqual(node.children[1].token.type, TokenType.LABEL)
+        self.assertEqual(node.children[1].token.text, "hello world")
+
+    def test_single_line_block_comment(self):
+        file_path = self.create_file(contents=dedent(
+        """
+        @startuml
+
+        /'    hello world'/
+
+        @enduml
+        """))
+        parser = Parser()
+
+        with open(file_path, "r") as file:
+            parse_tree = parser.parse_puml(file)
+
+        node = parse_tree.root_node.children[1]
+        self.assertEqual(node.token.type, TokenType.comment)
+        self.assertEqual(len(node.children), 3)
+        self.assertEqual(node.children[0].token.type, TokenType.START_BLOCK_COMMENT)
+        self.assertEqual(node.children[1].token.type, TokenType.LABEL)
+        self.assertEqual(node.children[1].token.text, "hello world")
+        self.assertEqual(node.children[2].token.type, TokenType.END_BLOCK_COMMENT)
+
+    def test_multi_line_block_comment(self):
+        file_path = self.create_file(contents=dedent(
+        """
+        @startuml
+
+        /' hello
+        
+        world
+        
+        '/
+
+        @enduml
+        """))
+        parser = Parser()
+
+        with open(file_path, "r") as file:
+            parse_tree = parser.parse_puml(file)
+
+        node = parse_tree.root_node.children[1]
+        self.assertEqual(node.token.type, TokenType.comment)
+        self.assertEqual(len(node.children), 4)
+        self.assertEqual(node.children[0].token.type, TokenType.START_BLOCK_COMMENT)
+        self.assertEqual(node.children[1].token.type, TokenType.LABEL)
+        self.assertEqual(node.children[1].token.text, "hello")
+        self.assertEqual(node.children[2].token.type, TokenType.LABEL)
+        self.assertEqual(node.children[2].token.text, "world")
+        self.assertEqual(node.children[3].token.type, TokenType.END_BLOCK_COMMENT)

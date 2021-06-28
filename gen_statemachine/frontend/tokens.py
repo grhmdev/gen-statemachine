@@ -43,6 +43,12 @@ class TokenType(Enum):
     CLOSE_CURLY_BRACKET = auto()
     # "
     QUOTATION = auto()
+    # '
+    APOSTROPHE = auto() 
+    # /'
+    START_BLOCK_COMMENT = auto()
+    # '/
+    END_BLOCK_COMMENT = auto()
     # <<stereotype>>
     STEREOTYPE_ANY = auto()
     # <<choice>>
@@ -75,6 +81,8 @@ class TokenType(Enum):
     anchored_note_declaration = auto()
     # note "What is this?" as Note1
     floating_note_declaration = auto()
+    # 'This is a comment
+    comment = auto()
 
     def __str__(self):
         return self.name
@@ -96,6 +104,9 @@ patterns = {
     TokenType.OPEN_CURLY_BRACKET: r"^{\Z",
     TokenType.CLOSE_CURLY_BRACKET: r"^}\Z",
     TokenType.QUOTATION: r'^"\Z',
+    TokenType.APOSTROPHE: r"^'\Z",
+    TokenType.START_BLOCK_COMMENT: r"^/'\Z",
+    TokenType.END_BLOCK_COMMENT: r"^'/\Z",
     TokenType.KEYWORD_NOTE: r"^note\Z",
     TokenType.KEYWORD_LEFT_OF: r"^left of\Z",
     TokenType.KEYWORD_RIGHT_OF: r"^right of\Z",

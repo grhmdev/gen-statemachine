@@ -1,12 +1,15 @@
 @startuml
 
+' States with labels and stereotypes
 state STATE1
 state STATE2 <<stereotype>>
 state STATE3 : State 3
 state STATE4 <<stereotype>> : State 4
 
+' Add state to label
 STATE1 : State 1
 
+' Composite states
 state STATE4 {
     state STATE5 <<end>>
     state STATE6 <<stereotype>>
@@ -21,19 +24,25 @@ state STATE4 {
     }
 }
 state STATE12 {
-
+    ' Nothing here
 }
 
+' Directional arrow transitions
 [*] -right-> STATE1
 STATE1 -left-> STATE2
 STATE2 -up-> STATE3
 STATE4 -down-> STATE5
 STATE2 --> [*]
 
+/' Choice stereotype and conditional transitions '/
 state STATE13 <<choice>> : this is a choice
 STATE13 --> STATE4 : [else]
 STATE13 --> STATE3 : [a > b] text here too
 
+/'
+    Entry and
+    exit states
+'/
 state STATE14 {
     state ENTRY <<entryPoint>> : text here too
     state EXIT <<exitPoint>>
@@ -43,6 +52,7 @@ state STATE14 {
     state EXP_OUT <<expansionOutput>>
 }
 
+' State aliasing
 state "State 15" as STATE15 <<stereotype>>
 state "State 16" as STATE16
 state "State 17" as STATE17 <<stereotype>> {
@@ -52,8 +62,10 @@ state "State 19" as STATE19 <<stereotype>> {
     STATE19 : label here
 }
 
+' Anchored notes
 note right of STATE14 : this is state 14
 note left of STATE14: this is state 14
+' Anchored block notes
 note right of STATE12
     this is state 12
     .
@@ -63,6 +75,7 @@ note left of STATE12
 
 end note
 
+' Floating note
 note "this note is lost" as N1
 
 @enduml
