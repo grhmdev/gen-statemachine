@@ -8,13 +8,13 @@ from .tokens import Token, TokenType
 
 @dataclass
 class Node:
-    token: Token
+    token: Optional[Token] = None
     children: List["Node"] = field(default_factory=list)
     parent: Optional["Node"] = None
 
     def make_child(self, token: Token) -> "Node":
         assert type(token) is Token
-        n = Node(token)
+        n = Node(token=token)
         self.children.append(n)
         n.parent = self
         return n
@@ -30,19 +30,9 @@ class Node:
             s += "\n" + child.to_str(depth + 1)
         return s
 
-class RootNode(Node):
-    def __init__(self):
-        super().__init__(None)
-
-    def to_str(self):
-        s = "root\n"
-        for child in self.children:
-            s += f"{child.to_str(1)}\n"
-        return s
-
 @dataclass
 class ParseTree:
-    root_node: RootNode = field(default_factory=RootNode)
+    root_node: Node = field(default_factory=Node)
 
     def __str__(self):
         return self.root_node.to_str()
@@ -296,24 +286,34 @@ class Parser:
         )
         transition_node.make_child(next_token)
 
-        # Look for newline or : token
+        # Look for :, stereotype or newline
         next_token = self.find_tokens(
-            tokens_to_find=[TokenType.NEWLINE, TokenType.COLON],
+            tokens_to_find=[TokenType.COLON, TokenType.STEREOTYPE_ANY, TokenType.NEWLINE],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
+
+        if next_token.type is TokenType.STEREOTYPE_ANY:
+            transition_node.make_child(next_token)
+            # Look for : or newline
+            next_token = self.find_tokens(
+                tokens_to_find=[TokenType.COLON, TokenType.NEWLINE],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
 
         if next_token.type is TokenType.NEWLINE:
             # End of state transition
             return
+
+        transition_node.make_child(next_token)
 
         # Look for [condition] or label
         next_token = self.find_tokens(
             tokens_to_find=[TokenType.CONDITION, TokenType.LABEL],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
-        transition_node.make_child(next_token)
 
         if next_token.type is TokenType.CONDITION:
+            transition_node.make_child(next_token)
             # Look for label or newline
             next_token = self.find_tokens(
                 tokens_to_find=[TokenType.LABEL, TokenType.NEWLINE],
