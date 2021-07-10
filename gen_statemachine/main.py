@@ -4,6 +4,7 @@ from pathlib import Path
 from sys import stdout
 
 import frontend
+import model
 
 LOGGER = logging.getLogger(__name__)
 
@@ -11,6 +12,7 @@ LOGGER = logging.getLogger(__name__)
 class Program:
     def __init__(self):
         self.parser = frontend.Parser()
+        self.model_builder = model.Builder()
 
     def parse_args(self) -> argparse.Namespace:
         parser = argparse.ArgumentParser()
