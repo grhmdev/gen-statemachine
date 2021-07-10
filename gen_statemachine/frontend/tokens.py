@@ -1,6 +1,7 @@
 from enum import Enum, auto
 from dataclasses import dataclass
 
+
 class TokenType(Enum):
     UNKNOWN = auto()
     EOF = auto()
@@ -44,7 +45,7 @@ class TokenType(Enum):
     # "
     QUOTATION = auto()
     # '
-    APOSTROPHE = auto() 
+    APOSTROPHE = auto()
     # /'
     START_BLOCK_COMMENT = auto()
     # '/

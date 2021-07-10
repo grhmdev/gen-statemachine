@@ -30,12 +30,14 @@ class Node:
             s += "\n" + child.to_str(depth + 1)
         return s
 
+
 @dataclass
 class ParseTree:
     root_node: Node = field(default_factory=Node)
 
     def __str__(self):
         return self.root_node.to_str()
+
 
 @dataclass
 class ParseError(RuntimeError):
@@ -52,7 +54,7 @@ class ParseError(RuntimeError):
           {self.message}
         =======================================
         """
-    
+
     def __repr__(self) -> str:
         return self.__str__()
 
@@ -257,12 +259,13 @@ class Parser:
                     self.parse_state_declaration(state_node, next_token)
                 elif next_token.type is TokenType.CLOSE_CURLY_BRACKET:
                     break
-                elif next_token.type in [TokenType.START_BLOCK_COMMENT, TokenType.APOSTROPHE]:
+                elif next_token.type in [
+                    TokenType.START_BLOCK_COMMENT,
+                    TokenType.APOSTROPHE,
+                ]:
                     self.parse_comment(state_node, next_token)
                 else:
-                    self.parse_state_transition_or_state_label(
-                        state_node, next_token
-                    )
+                    self.parse_state_transition_or_state_label(state_node, next_token)
         elif next_token.type is TokenType.COLON:
             # Look for label
             next_token = self.find_tokens(
@@ -296,7 +299,11 @@ class Parser:
 
         # Look for :, stereotype or newline
         next_token = self.find_tokens(
-            tokens_to_find=[TokenType.COLON, TokenType.STEREOTYPE_ANY, TokenType.NEWLINE],
+            tokens_to_find=[
+                TokenType.COLON,
+                TokenType.STEREOTYPE_ANY,
+                TokenType.NEWLINE,
+            ],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
 
@@ -448,14 +455,10 @@ class Parser:
 
         LOGGER.debug("end of state_label")
 
-    def parse_comment(
-        self, parent_node: Node, first_token: Token
-    ):
+    def parse_comment(self, parent_node: Node, first_token: Token):
         LOGGER.debug("start of comment")
         # Create node for production rule
-        comment_token = Token(
-            type=TokenType.comment, start_line=first_token.start_line
-        )
+        comment_token = Token(type=TokenType.comment, start_line=first_token.start_line)
         comment_node = parent_node.make_child(comment_token)
 
         # Add the first token
@@ -479,6 +482,5 @@ class Parser:
 
                 if next_token.type is TokenType.END_BLOCK_COMMENT:
                     break
-        
-        
+
         LOGGER.debug("end of comment")
