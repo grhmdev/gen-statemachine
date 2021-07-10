@@ -43,4 +43,4 @@ The following language features are supported but will be ignored by the tool an
 
 ## Usage
 
-TODO
+`python3 main.py /path/to/state/diagram.puml`
