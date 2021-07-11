@@ -20,9 +20,9 @@ class Builder:
 
     def parse_node(self, node: ParseTreeNode):
         if node.token:
-            if node.token.type.value in [
-                TokenType.state_declaration.value,
-                TokenType.state_alias_declaration.value,
+            if node.token.type in [
+                TokenType.state_declaration,
+                TokenType.state_alias_declaration,
             ]:
                 self.create_state(node)
 
@@ -42,11 +42,9 @@ class Builder:
 
         return state
 
-    def extract_first_token(
-        self, node: ParseTreeNode, token_type: TokenType
-    ) -> Token:
+    def extract_first_token(self, node: ParseTreeNode, token_type: TokenType) -> Token:
         for child in node.children:
-            if child.token and child.token.type.value == token_type.value:
+            if child.token and child.token.type == token_type:
                 return child.token
         raise RuntimeError(f"Node not found with {token_type}")
 

@@ -3,7 +3,7 @@ from typing import TextIO, List, Callable, NewType, Optional
 from dataclasses import dataclass, field
 
 from .lexer import LOGGER, Lexer
-from .tokens import Token, TokenType
+from gen_statemachine.frontend.tokens import Token, TokenType
 
 
 @dataclass
