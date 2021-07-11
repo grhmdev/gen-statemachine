@@ -13,7 +13,7 @@ class Builder:
     def __init__(self):
         self.model: FSM = None
 
-    def build(self, parse_tree: ParseTree) -> FSM:
+    def build_model_from(self, parse_tree: ParseTree) -> FSM:
         self.model = FSM()
         self.parse_node(parse_tree.root_node)
         return self.model
