@@ -2,48 +2,107 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
+from enum import Enum
 
 
 @dataclass
-class Event:
-    name: str = ""
+class Entity:
+    id: str
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+    def __str__(self) -> str:
+        return f"id:{self.id}, name:{self.name}"
+
+@dataclass
+class Trigger(Entity):
+    pass
 
 
 @dataclass
-class Action:
-    text: str = ""
+class Effect(Entity):
+    text: Optional[str] = None
 
 
 @dataclass
-class Transition:
-    start_state: State
-    destination_state: State
-    event: Optional[Event] = None
-    actions: List[Action] = field(default_factory=list)
+class Guard(Entity):
+    condition: Optional[str] = None
+
+
+class TransitionType(Enum):
+    INVALID  = 1
+    EXTERNAL = 2
+    INTERNAL = 3
+    LOCAL    = 4
 
 
 @dataclass
-class State:
-    name: str = ""
-    entry_actions: List[Action] = field(default_factory=list)
-    exit_actions: List[Action] = field(default_factory=list)
-    parent_state: Optional["State"] = None
-    sub_states: List["State"] = field(default_factory=list)
-    exit_transitions: List[Transition] = field(default_factory=list)
-    entry_transitions: List[Transition] = field(default_factory=list)
+class Transition(Entity):
+    source: Optional[Vertex] = None
+    target: Optional[Vertex] = None
+    type: TransitionType = TransitionType.INVALID
+    stereotype: Optional[str] = None
+    trigger: Optional[Trigger] = None
+    guard: Optional[Guard] = None
+    effect: Optional[Effect] = None
+
+@dataclass
+class Vertex(Entity):
+    container: Optional[Region] = None
+    incoming_transitions: List[Transition] = field(default_factory=list)
+    outgoing_transitions: List[Transition] = field(default_factory=list)
+    stereotype: Optional[str] = None
+
+
+class StateType(Enum):
+    INVALID   = 0
+    SIMPLE    = 1
+    COMPOSITE = 2
 
 
 @dataclass
-class FSM:
-    name: str = ""
+class State(Vertex):
+    type: StateType = StateType.INVALID
+    entry_effects: List[Effect] = field(default_factory=list)
+    exit_effects: List[Effect] = field(default_factory=list)
+    regions: List[Region] = field(default_factory=list)
+
+
+@dataclass
+class PseudoState(Vertex):
+    pass
+
+
+@dataclass
+class ChoicePseudoState(PseudoState):
+    pass
+
+
+@dataclass
+class InitialState(State):
+    pass
+
+
+@dataclass
+class FinalState(State):
+    pass
+
+
+@dataclass
+class Region(Entity):
     states: Dict[str, State] = field(default_factory=dict)
-    transitions: List[Transition] = field(default_factory=list)
+    transitions: Dict[str, Transition] = field(default_factory=dict)
+    choice_pseudo_states: Dict[str, ChoicePseudoState] = field(default_factory=dict)
 
-    def find_state(self, name: str) -> Optional[State]:
-        return self.states.get(name, None)
 
-    def add_state(self, name: str) -> State:
-        state = State()
-        state.name = name
-        self.states[state.name] = state
+@dataclass
+class StateMachine(Entity):
+    region: Optional[Region] = None
+    entities: Dict[str, State] = field(default_factory=dict)
+
+    def get_or_create_state(self, name: str) -> State:
+        if state := self.states.get(name, None) is None:
+            state = State()
+            state.name = name
+            self.states[state.name] = state
         return state

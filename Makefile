@@ -12,4 +12,4 @@ lint:
 	poetry run python -m mypy gen_statemachine/ --ignore-missing-imports
 
 diagrams:
-	plantuml examples/*
+	plantuml examples/*.puml

@@ -44,3 +44,7 @@ The following language features are supported but will be ignored by the tool an
 ## Usage
 
 `python3 main.py /path/to/state/diagram.puml`
+
+## Dependencies
+
+- PlantUML version 1.2019.9 or higher to use `make diagrams`

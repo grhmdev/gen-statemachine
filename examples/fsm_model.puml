@@ -1,0 +1,87 @@
+@startuml
+
+' Use orthoganal arrows
+skinparam linetype ortho
+' Set box spacing in the X plane
+skinparam nodesep 50
+' Set box spacing in the Y plane
+skinparam ranksep 50
+
+' Classes
+class StateType <<Enum>> {
+    INVALID
+    SIMPLE
+    COMPOSITE
+}
+class Entity {
+    id: str
+    description: Optional[str]
+}
+class StateMachine {
+
+}
+class Region
+class Vertex {
+    stereotype: Optional[str]
+}
+class State {
+
+}
+class InitialState
+class FinalState
+class PseudoState {
+
+}
+class Choice
+class Transition {
+    stereotype: Optional[str]
+}
+class Event {
+    text: str
+}
+class Guard {
+    condition: str
+}
+class Action {
+    text: str
+}
+' StateMachine relations
+Entity <|-- StateMachine
+StateMachine "1..*" *-- "1" Region
+
+' Region relations
+Entity <|-- Region
+Region "0..*" *-- "1" Vertex
+Region "0..*" *-- Transition
+
+' Vertex relations
+Entity <|-- Vertex
+Vertex "0..*" o-- "2" Transition
+
+' State relations
+Vertex <|-- State
+State "0..2" *-- Action 
+
+State <|-- InitialState
+State <|-- FinalState
+
+' Psuedostate relations
+Vertex <|-- PseudoState
+PseudoState <|-- Choice
+
+' Event relations
+Entity <|-- Event
+
+' Guard relations
+Entity <|-- Guard
+
+' Action relations
+Entity <|-- Action
+
+' Transition relations
+Entity <|-- Transition
+Transition "0..1" *-- Event
+Transition "0..1" *-- Guard
+Transition "0..1" *-- Action
+
+@enduml

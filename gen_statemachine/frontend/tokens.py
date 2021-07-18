@@ -142,6 +142,17 @@ patterns = {
     TokenType.STEREOTYPE_EXPANSION_OUTPUT: r"^<<expansionOutput>>\Z",
 }
 
+STEREOTYPE_TOKEN_TYPES = [
+    TokenType.STEREOTYPE_ANY,
+    TokenType.STEREOTYPE_CHOICE,
+    TokenType.STEREOTYPE_END,
+    TokenType.STEREOTYPE_ENTRY_POINT,
+    TokenType.STEREOTYPE_EXIT_POINT,
+    TokenType.STEREOTYPE_INPUT_PIN,
+    TokenType.STEREOTYPE_OUTPUT_PIN,
+    TokenType.STEREOTYPE_EXPANSION_INPUT,
+    TokenType.STEREOTYPE_EXPANSION_OUTPUT
+]
 
 @dataclass
 class Token:
