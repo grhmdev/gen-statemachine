@@ -1,7 +1,7 @@
 import unittest
 from tests.utilities import TestCaseBase
 
-from gen_statemachine.model import Builder, FSM
+from gen_statemachine.model import Builder, StateMachine
 from gen_statemachine.frontend import Token, TokenType, ParseTree, Node
 
 
@@ -12,10 +12,10 @@ class TestBuilder(TestCaseBase):
         builder = Builder()
         model = builder.build_model_from(parse_tree)
 
-        self.assertEqual(len(model.states), 0)
+        self.assertEqual(len(model.region.states), 0)
 
     def test_state_declaration_token(self):
-        """Tests model generation from a token tree with a single state declaration node"""
+        """Tests model generation from a parse tree with a single state declaration token"""
         parse_tree = ParseTree()
         state_declaration_node = parse_tree.root_node.make_child(
             Token(TokenType.state_declaration)
@@ -26,9 +26,8 @@ class TestBuilder(TestCaseBase):
         builder = Builder()
         model = builder.build_model_from(parse_tree)
 
-        self.assertEqual(len(model.states), 1)
-        state = model.find_state("STATE")
-        self.assertIsNotNone(state)
+        self.assertEqual(len(model.region.states), 1)
+        state = list(model.region.states.values())[0]
         self.assertEqual(state.name, "STATE")
 
 
