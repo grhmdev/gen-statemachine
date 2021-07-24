@@ -1,26 +1,42 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union, Type, cast
 from enum import Enum
+
+# Type aliases
+Id = str
+AnyEntity = Union[
+    Event,
+    Action,
+    Guard,
+    Transition,
+    State,
+    Choice,
+    InitialState,
+    FinalState,
+    Region,
+    StateMachine,
+]
 
 
 @dataclass
 class Entity:
-    id: str
+    id: Id
     name: Optional[str] = None
     description: Optional[str] = None
 
     def __str__(self) -> str:
         return f"id:{self.id}, name:{self.name}"
 
+
 @dataclass
-class Trigger(Entity):
+class Event(Entity):
     pass
 
 
 @dataclass
-class Effect(Entity):
+class Action(Entity):
     text: Optional[str] = None
 
 
@@ -30,10 +46,10 @@ class Guard(Entity):
 
 
 class TransitionType(Enum):
-    INVALID  = 1
+    INVALID = 1
     EXTERNAL = 2
     INTERNAL = 3
-    LOCAL    = 4
+    LOCAL = 4
 
 
 @dataclass
@@ -42,9 +58,10 @@ class Transition(Entity):
     target: Optional[Vertex] = None
     type: TransitionType = TransitionType.INVALID
     stereotype: Optional[str] = None
-    trigger: Optional[Trigger] = None
+    trigger: Optional[Event] = None
     guard: Optional[Guard] = None
-    effect: Optional[Effect] = None
+    action: Optional[Action] = None
+
 
 @dataclass
 class Vertex(Entity):
@@ -55,17 +72,17 @@ class Vertex(Entity):
 
 
 class StateType(Enum):
-    INVALID   = 0
-    SIMPLE    = 1
+    INVALID = 0
+    SIMPLE = 1
     COMPOSITE = 2
 
 
 @dataclass
 class State(Vertex):
     type: StateType = StateType.INVALID
-    entry_effects: List[Effect] = field(default_factory=list)
-    exit_effects: List[Effect] = field(default_factory=list)
-    regions: List[Region] = field(default_factory=list)
+    entry_actions: List[Action] = field(default_factory=list)
+    exit_actions: List[Action] = field(default_factory=list)
+    regions: Dict[Id, Region] = field(default_factory=dict)
 
 
 @dataclass
@@ -74,7 +91,7 @@ class PseudoState(Vertex):
 
 
 @dataclass
-class ChoicePseudoState(PseudoState):
+class Choice(PseudoState):
     pass
 
 
@@ -90,19 +107,60 @@ class FinalState(State):
 
 @dataclass
 class Region(Entity):
-    states: Dict[str, State] = field(default_factory=dict)
-    transitions: Dict[str, Transition] = field(default_factory=dict)
-    choice_pseudo_states: Dict[str, ChoicePseudoState] = field(default_factory=dict)
+    states: Dict[Id, State] = field(default_factory=dict)
+    transitions: Dict[Id, Transition] = field(default_factory=dict)
+    choices: Dict[Id, Choice] = field(default_factory=dict)
+
+    def is_empty(self) -> bool:
+        """Does this region own any entities?"""
+        return not (self.states or self.transitions or self.choices)
 
 
 @dataclass
 class StateMachine(Entity):
     region: Optional[Region] = None
-    entities: Dict[str, State] = field(default_factory=dict)
+    entities: Dict[Id, AnyEntity] = field(default_factory=dict)
 
-    def get_or_create_state(self, name: str) -> State:
-        if state := self.states.get(name, None) is None:
-            state = State()
-            state.name = name
-            self.states[state.name] = state
-        return state
+    def _filter_entities(self, EntityType: Type[AnyEntity]) -> Dict[str, AnyEntity]:
+        return dict(filter(lambda t: type(t[1]) is EntityType, self.entities.items()))
+
+    def _gen_entity_id(self, EntityType: Type[AnyEntity]) -> Id:
+        return f"{self.id}.{type.__name__.lower()}{len(self._filter_entities(EntityType)) + 1}"
+
+    def _new_entity(self, EntityType: Type[AnyEntity]) -> AnyEntity:
+        entity = EntityType(id=self._gen_entity_id(EntityType))
+        self.entities[entity.id] = entity
+        return entity
+
+    def states(self) -> Dict[Id, State]:
+        return cast(Dict[Id, State], self._filter_entities(State))
+
+    def regions(self) -> Dict[Id, Region]:
+        return cast(Dict[Id, Region], self._filter_entities(Region))
+
+    def choices(self) -> Dict[Id, Choice]:
+        return cast(Dict[Id, Choice], self._filter_entities(Choice))
+
+    def transitions(self) -> Dict[Id, Transition]:
+        return cast(Dict[Id, Transition], self._filter_entities(Transition))
+
+    def new_state(self) -> State:
+        return cast(State, self._new_entity(State))
+
+    def new_region(self) -> Region:
+        return cast(Region, self._new_entity(Region))
+
+    def new_transition(self) -> Transition:
+        return cast(Transition, self._new_entity(Transition))
+
+    def new_event(self) -> Event:
+        return cast(Event, self._new_entity(Event))
+
+    def new_action(self) -> Action:
+        return cast(Action, self._new_entity(Action))
+
+    def new_guard(self) -> Guard:
+        return cast(Guard, self._new_entity(Guard))
+
+    def new_choice(self) -> Choice:
+        return cast(Choice, self._new_entity(Choice))
