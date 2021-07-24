@@ -12,7 +12,7 @@ LOGGER = logging.getLogger(__name__)
 class Program:
     def __init__(self):
         self.parser = frontend.Parser()
-        self.model_builder = model.Builder()
+        self.model_factory = model.ModelFactory()
 
     def parse_args(self) -> argparse.Namespace:
         parser = argparse.ArgumentParser()

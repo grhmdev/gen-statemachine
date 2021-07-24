@@ -1,18 +1,18 @@
-from gen_statemachine.model.model import StateType
 import unittest
 from tests.utilities import TestCaseBase
 
-from gen_statemachine.model import Builder, StateMachine
-from gen_statemachine.frontend import Token, TokenType, ParseTree, Node
+from gen_statemachine.model.model import StateType
+from gen_statemachine.model import ModelFactory
+from gen_statemachine.frontend import Token, TokenType, ParseTree
 
 
-class TestBuilder(TestCaseBase):
+class TestModelFactory(TestCaseBase):
     def test_empty_tree(self):
         """Test an empty parse tree"""
         parse_tree = ParseTree()
 
-        builder = Builder()
-        statemachine = builder.build_model_from(parse_tree)
+        factory = ModelFactory()
+        statemachine = factory.new_statemachine(parse_tree)
 
         region1 = statemachine.entities["statemachine.region1"]
         self.assertEqual(len(region1.states), 0)
@@ -34,8 +34,8 @@ class TestBuilder(TestCaseBase):
             Token(TokenType.LABEL, 0, 0, "descriptive text")
         )
 
-        builder = Builder()
-        statemachine = builder.build_model_from(parse_tree)
+        factory = ModelFactory()
+        statemachine = factory.new_statemachine(parse_tree)
 
         state1 = statemachine.entities["statemachine.state1"]
         self.assertEqual(state1.name, "STATE")
@@ -61,8 +61,8 @@ class TestBuilder(TestCaseBase):
         nested_state_declaration_node.make_child(Token(TokenType.KEYWORD_STATE))
         nested_state_declaration_node.make_child(Token(TokenType.NAME, 0, 0, "STATE2"))
 
-        builder = Builder()
-        statemachine = builder.build_model_from(parse_tree)
+        factory = ModelFactory()
+        statemachine = factory.new_statemachine(parse_tree)
 
         state1 = statemachine.entities["statemachine.state1"]
         self.assertEqual(state1.name, "STATE1")

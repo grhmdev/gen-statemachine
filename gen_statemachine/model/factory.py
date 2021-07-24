@@ -175,11 +175,11 @@ class RegionFactory:
         self.region.choices[choice.id] = choice
 
 
-class Builder:
+class ModelFactory:
     def __init__(self):
         self.statemachine: StateMachine = None
 
-    def build_model_from(self, parse_tree: ParseTree) -> StateMachine:
+    def new_statemachine(self, parse_tree: ParseTree) -> StateMachine:
         # Create statemachine
         self.statemachine = StateMachine(id="statemachine")
         self.statemachine.name = "statemachine"

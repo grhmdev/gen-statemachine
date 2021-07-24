@@ -4,21 +4,6 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Union, Type, cast
 from enum import Enum
 
-# Type aliases
-Id = str
-AnyEntity = Union[
-    Event,
-    Action,
-    Guard,
-    Transition,
-    State,
-    Choice,
-    InitialState,
-    FinalState,
-    Region,
-    StateMachine,
-]
-
 
 @dataclass
 class Entity:
@@ -125,7 +110,7 @@ class StateMachine(Entity):
         return dict(filter(lambda t: type(t[1]) is EntityType, self.entities.items()))
 
     def _gen_entity_id(self, EntityType: Type[AnyEntity]) -> Id:
-        return f"{self.id}.{type.__name__.lower()}{len(self._filter_entities(EntityType)) + 1}"
+        return f"{self.id}.{EntityType.__name__.lower()}{len(self._filter_entities(EntityType)) + 1}"
 
     def _new_entity(self, EntityType: Type[AnyEntity]) -> AnyEntity:
         entity = EntityType(id=self._gen_entity_id(EntityType))
@@ -164,3 +149,19 @@ class StateMachine(Entity):
 
     def new_choice(self) -> Choice:
         return cast(Choice, self._new_entity(Choice))
+
+
+# Type aliases
+Id = str
+AnyEntity = Union[
+    Event,
+    Action,
+    Guard,
+    Transition,
+    State,
+    Choice,
+    InitialState,
+    FinalState,
+    Region,
+    StateMachine,
+]
