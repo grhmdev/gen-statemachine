@@ -31,9 +31,9 @@ class Node:
         return s
 
 
-@dataclass
 class ParseTree:
-    root_node: Node = field(default_factory=Node)
+    def __init__(self):
+        self.root_node = Node(Token(TokenType.root))
 
     def __str__(self):
         return self.root_node.to_str()
@@ -51,7 +51,7 @@ class ParseError(RuntimeError):
         =======================================
         ʘ︵ʘ oh no!!!
         Parse error @ [{self.file_name}:{self.line_no}:{self.column_no}]
-          {self.message}
+          {self.error_message}
         =======================================
         """
 
@@ -71,61 +71,14 @@ class Parser:
         self.lexer = None
         self.parse_tree = ParseTree()
 
-    def parse_puml(self, file: TextIO) -> ParseTree:
-        self.lexer = Lexer(file)
-        self.file_name = file.name
-
-        # Find @startuml to begin parsing
-        start_token = self.find_tokens(
-            tokens_to_find=[TokenType.KEYWORD_START_UML],
-            tokens_to_skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
-        )
-        self.parse_tree.root_node.make_child(start_token)
-
-        # Now parse following lines until @enduml is found
-        end_token_found = False
-        while end_token_found is False:
-            # The order of tokens to search for is important here,
-            # otherwise we'd falsely identify "state" as an identifier/name
-            # rather than a keyword!
-            token = self.lexer.look_for_tokens(
-                skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
-                take=[
-                    TokenType.KEYWORD_END_UML,
-                    TokenType.KEYWORD_STATE,
-                    TokenType.KEYWORD_NOTE,
-                    TokenType.START_BLOCK_COMMENT,
-                    TokenType.APOSTROPHE,
-                    TokenType.INITIAL_FINAL_STATE,
-                    TokenType.NAME,
-                ],
-            )
-
-            if token.type is TokenType.UNKNOWN:
-                LOGGER.error(f"Unknown token found: {token}")
-                break
-            elif token.type is TokenType.EOF:
-                LOGGER.warning("End-of-file found before closing @enduml")
-                break
-            elif token.type is TokenType.KEYWORD_END_UML:
-                self.parse_tree.root_node.make_child(token)
-                end_token_found = True
-            elif token.type is TokenType.KEYWORD_STATE:
-                self.parse_state_declaration(self.parse_tree.root_node, token)
-            elif token.type in [TokenType.START_BLOCK_COMMENT, TokenType.APOSTROPHE]:
-                self.parse_comment(self.parse_tree.root_node, token)
-            elif token.type is TokenType.KEYWORD_NOTE:
-                self.parse_note_declaration(self.parse_tree.root_node, token)
-            elif token.type in [TokenType.INITIAL_FINAL_STATE, TokenType.NAME]:
-                self.parse_transition_declaration_or_state_label(
-                    self.parse_tree.root_node, token
-                )
-
-        return self.parse_tree
-
-    def find_tokens(
+    def _find_tokens(
         self, tokens_to_find: List[TokenType], tokens_to_skip: List[TokenType]
-    ):
+    ) -> Token:
+        """
+        Queries the lexer for the next token that matches one of `tokens_to_find`.
+        If the returned token is not in this list, a parse error is raised. If the next
+        token is in `tokens_to_skip`, the lexer will ignore it and keeping looking.
+        """
         next_token = self.lexer.look_for_tokens(tokens_to_find, tokens_to_skip)
 
         if next_token.type not in tokens_to_find:
@@ -143,11 +96,95 @@ class Parser:
 
         return next_token
 
+    def parse_puml(self, file: TextIO) -> ParseTree:
+        self.lexer = Lexer(file)
+        self.file_name = file.name
+        self.parse_root()
+        return self.parse_tree
+
+    def parse_root(self):
+        # root = KEYWORD_START_UML [LABEL] NEWLINE declarations KEYWORD_END_UML
+        root_node = self.parse_tree.root_node
+
+        # KEYWORD_START_UML
+        start_token = self._find_tokens(
+            tokens_to_find=[TokenType.KEYWORD_START_UML],
+            tokens_to_skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
+        )
+        root_node.make_child(start_token)
+
+        # [LABEL] NEWLINE
+        next_token = self._find_tokens(
+            tokens_to_find=[TokenType.LABEL, TokenType.NEWLINE],
+            tokens_to_skip=[TokenType.WHITESPACE],
+        )
+        if next_token.type is TokenType.LABEL:
+            root_node.make_child(next_token)
+            self._find_tokens(
+                tokens_to_find=[TokenType.NEWLINE],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+
+        # declarations
+        end_token = self.parse_declarations(
+            root_node, terminal_token=TokenType.KEYWORD_END_UML
+        )
+
+        # KEYWORD_END_UML
+        root_node.make_child(end_token)
+
+    def parse_declarations(self, parent_node, terminal_token: TokenType) -> Token:
+        """Parses declarations until `terminal_token` is found and returned"""
+        # declarations = {declaration NEWLINE}+
+        declarations_node = parent_node.make_child(Token(TokenType.declarations))
+
+        # declaration = state_declaration
+        #             | state_alias_declaration
+        #             | transition_declaration
+        #             | anchored_note_declaration
+        #             | floating_note_declaration
+        #             | comment
+
+        # The order of tokens to search for is important here,
+        # e.g. KEYWORD_STATE should precede NAME because "state"
+        # is also a valid name
+        tokens_to_find = [
+            terminal_token,
+            TokenType.KEYWORD_STATE,
+            TokenType.KEYWORD_NOTE,
+            TokenType.START_BLOCK_COMMENT,
+            TokenType.APOSTROPHE,
+            TokenType.INITIAL_FINAL_STATE,
+            TokenType.NAME,
+        ]
+        tokens_to_skip = [TokenType.WHITESPACE, TokenType.NEWLINE]
+
+        # Keep parsing until the terminal token is found, or EOF error
+        while True:
+            token = self._find_tokens(tokens_to_find, tokens_to_skip)
+
+            if token.type is TokenType.UNKNOWN:
+                raise RuntimeError(f"Unknown token found: {token}")
+            elif token.type is TokenType.EOF:
+                raise RuntimeError(f"End-of-file found before token {terminal_token}")
+            elif token.type is terminal_token:
+                return token
+            elif token.type is TokenType.KEYWORD_STATE:
+                self.parse_state_declaration(declarations_node, token)
+            elif token.type in [TokenType.START_BLOCK_COMMENT, TokenType.APOSTROPHE]:
+                self.parse_comment(declarations_node, token)
+            elif token.type is TokenType.KEYWORD_NOTE:
+                self.parse_note_declaration(declarations_node, token)
+            elif token.type in [TokenType.INITIAL_FINAL_STATE, TokenType.NAME]:
+                self.parse_transition_declaration_or_state_label(
+                    declarations_node, token
+                )
+
     def parse_transition_declaration_or_state_label(
         self, parent_node: Node, first_token: Token
     ):
         # Look for arrow or colon to determine production rule
-        second_token = self.find_tokens(
+        second_token = self._find_tokens(
             tokens_to_find=[TokenType.ARROW, TokenType.COLON],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
@@ -169,7 +206,7 @@ class Parser:
         state_node.make_child(first_token)
 
         # Look for state name, or quotation enclosed label
-        next_token = self.find_tokens(
+        next_token = self._find_tokens(
             tokens_to_find=[TokenType.NAME, TokenType.QUOTATION],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
@@ -179,29 +216,29 @@ class Parser:
         else:
             state_token.type = TokenType.state_alias_declaration
 
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.LABEL], tokens_to_skip=[TokenType.WHITESPACE]
             )
             state_node.make_child(next_token)
 
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.QUOTATION],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
 
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.KEYWORD_AS],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
             state_node.make_child(next_token)
 
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.NAME], tokens_to_skip=[TokenType.WHITESPACE]
             )
             state_node.make_child(next_token)
 
         # Look for stereotype, {, :, or newline
-        next_token = self.find_tokens(
+        next_token = self._find_tokens(
             tokens_to_find=[
                 TokenType.STEREOTYPE_CHOICE,
                 TokenType.STEREOTYPE_END,
@@ -232,7 +269,7 @@ class Parser:
         ]:
             state_node.make_child(next_token)
             # Look for {, :, or newline
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[
                     TokenType.OPEN_CURLY_BRACKET,
                     TokenType.COLON,
@@ -243,34 +280,12 @@ class Parser:
 
         if next_token.type is TokenType.OPEN_CURLY_BRACKET:
             # Look for nested state declarations and state transitions
-            while True:
-                next_token = self.find_tokens(
-                    tokens_to_find=[
-                        TokenType.KEYWORD_STATE,
-                        TokenType.INITIAL_FINAL_STATE,
-                        TokenType.APOSTROPHE,
-                        TokenType.START_BLOCK_COMMENT,
-                        TokenType.NAME,
-                        TokenType.CLOSE_CURLY_BRACKET,
-                    ],
-                    tokens_to_skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
-                )
-                if next_token.type is TokenType.KEYWORD_STATE:
-                    self.parse_state_declaration(state_node, next_token)
-                elif next_token.type is TokenType.CLOSE_CURLY_BRACKET:
-                    break
-                elif next_token.type in [
-                    TokenType.START_BLOCK_COMMENT,
-                    TokenType.APOSTROPHE,
-                ]:
-                    self.parse_comment(state_node, next_token)
-                else:
-                    self.parse_transition_declaration_or_state_label(
-                        state_node, next_token
-                    )
+            self.parse_declarations(
+                state_node, terminal_token=TokenType.CLOSE_CURLY_BRACKET
+            )
         elif next_token.type is TokenType.COLON:
             # Look for label
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.LABEL],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
@@ -293,14 +308,14 @@ class Parser:
         transition_node.make_child(arrow_token)
 
         # Look for [*] or name token
-        next_token = self.find_tokens(
+        next_token = self._find_tokens(
             tokens_to_find=[TokenType.INITIAL_FINAL_STATE, TokenType.NAME],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
         transition_node.make_child(next_token)
 
         # Look for :, stereotype or newline
-        next_token = self.find_tokens(
+        next_token = self._find_tokens(
             tokens_to_find=[
                 TokenType.COLON,
                 TokenType.STEREOTYPE_ANY,
@@ -312,7 +327,7 @@ class Parser:
         if next_token.type is TokenType.STEREOTYPE_ANY:
             transition_node.make_child(next_token)
             # Look for : or newline
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.COLON, TokenType.NEWLINE],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
@@ -324,7 +339,7 @@ class Parser:
         transition_node.make_child(next_token)
 
         # Look for [condition] or label
-        next_token = self.find_tokens(
+        next_token = self._find_tokens(
             tokens_to_find=[TokenType.CONDITION, TokenType.LABEL],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
@@ -332,7 +347,7 @@ class Parser:
         if next_token.type is TokenType.CONDITION:
             transition_node.make_child(next_token)
             # Look for label or newline
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.LABEL, TokenType.NEWLINE],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
@@ -354,7 +369,7 @@ class Parser:
         note_node.make_child(first_token)
 
         # Look for "left of", "right of" or quotation
-        next_token = self.find_tokens(
+        next_token = self._find_tokens(
             tokens_to_find=[
                 TokenType.KEYWORD_LEFT_OF,
                 TokenType.KEYWORD_RIGHT_OF,
@@ -367,27 +382,27 @@ class Parser:
             note_token.type = TokenType.floating_note_declaration
 
             # Look for label
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.LABEL],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
             note_node.make_child(next_token)
 
             # Look for end quotation
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.QUOTATION],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
 
             # Look for "as"
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.KEYWORD_AS],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
             note_node.make_child(next_token)
 
             # Look for note name
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.NAME],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
@@ -396,21 +411,21 @@ class Parser:
             note_node.make_child(next_token)
 
             # Look for state name
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.NAME],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
             note_node.make_child(next_token)
 
             # Look for colon or newline
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.COLON, TokenType.NEWLINE],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
 
             if next_token.type is TokenType.COLON:
                 # Look for label
-                next_token = self.find_tokens(
+                next_token = self._find_tokens(
                     tokens_to_find=[TokenType.LABEL],
                     tokens_to_skip=[TokenType.WHITESPACE],
                 )
@@ -418,14 +433,14 @@ class Parser:
             else:
                 while True:
                     # Look for labels or end note
-                    next_token = self.find_tokens(
+                    next_token = self._find_tokens(
                         tokens_to_find=[TokenType.KEYWORD_END, TokenType.LABEL],
                         tokens_to_skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
                     )
                     note_node.make_child(next_token)
 
                     if next_token.type is TokenType.KEYWORD_END:
-                        next_token = self.find_tokens(
+                        next_token = self._find_tokens(
                             tokens_to_find=[TokenType.KEYWORD_NOTE],
                             tokens_to_skip=[TokenType.WHITESPACE],
                         )
@@ -449,7 +464,7 @@ class Parser:
         state_label_node.make_child(colon_token)
 
         # Look for label
-        next_token = self.find_tokens(
+        next_token = self._find_tokens(
             tokens_to_find=[TokenType.LABEL],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
@@ -468,7 +483,7 @@ class Parser:
 
         if first_token.type is TokenType.APOSTROPHE:
             # This is a single line comment
-            next_token = self.find_tokens(
+            next_token = self._find_tokens(
                 tokens_to_find=[TokenType.LABEL],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
@@ -476,7 +491,7 @@ class Parser:
         else:
             # This is a block comment, that could contain newlines
             while True:
-                next_token = self.find_tokens(
+                next_token = self._find_tokens(
                     tokens_to_find=[TokenType.END_BLOCK_COMMENT, TokenType.LABEL],
                     tokens_to_skip=[TokenType.WHITESPACE, TokenType.NEWLINE],
                 )

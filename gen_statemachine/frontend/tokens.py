@@ -70,6 +70,8 @@ class TokenType(Enum):
     STEREOTYPE_EXPANSION_OUTPUT = auto()
 
     # Production rules / "sentences"
+    root = auto()
+    declarations = auto()
     # state Disabled
     state_declaration = auto()
     # state "Powered On" as ON

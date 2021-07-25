@@ -25,7 +25,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_declaration)
         self.assertEqual(len(node.children), 2)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -49,7 +50,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -75,7 +77,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -101,7 +104,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_declaration)
         self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -129,7 +133,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.anchored_note_declaration)
         self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_NOTE)
@@ -156,7 +161,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.anchored_note_declaration)
         self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_NOTE)
@@ -186,7 +192,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.anchored_note_declaration)
         self.assertEqual(len(node.children), 7)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_NOTE)
@@ -220,7 +227,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.anchored_note_declaration)
         self.assertEqual(len(node.children), 7)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_NOTE)
@@ -251,7 +259,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.floating_note_declaration)
         self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_NOTE)
@@ -278,7 +287,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_alias_declaration)
         self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -305,7 +315,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_alias_declaration)
         self.assertEqual(len(node.children), 5)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -334,7 +345,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_alias_declaration)
         self.assertEqual(len(node.children), 5)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -363,7 +375,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_alias_declaration)
         self.assertEqual(len(node.children), 6)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -398,9 +411,10 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_alias_declaration)
-        self.assertEqual(len(node.children), 8)
+        self.assertEqual(len(node.children), 6)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
         self.assertEqual(node.children[1].token.type, TokenType.LABEL)
         self.assertEqual(node.children[1].token.text, "hello world")
@@ -409,17 +423,16 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[3].token.text, "STATE1")
         self.assertEqual(node.children[4].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[4].token.text, "<<stereotype>>")
-        self.assertEqual(node.children[5].token.type, TokenType.state_declaration)
-        self.assertEqual(node.children[6].token.type, TokenType.transition_declaration)
-        self.assertEqual(node.children[7].token.type, TokenType.state_label)
+        self.assertEqual(node.children[5].token.type, TokenType.declarations)
+        nested_declarations_node = node.children[5]
         # Test nested state
-        child_node = node.children[5]
+        child_node = nested_declarations_node.children[0]
         self.assertEqual(len(child_node.children), 2)
         self.assertEqual(child_node.children[0].token.type, TokenType.KEYWORD_STATE)
         self.assertEqual(child_node.children[1].token.type, TokenType.NAME)
         self.assertEqual(child_node.children[1].token.text, "STATE2")
         # Test nested transition
-        child_node = node.children[6]
+        child_node = nested_declarations_node.children[1]
         self.assertEqual(len(child_node.children), 5)
         self.assertEqual(
             child_node.children[0].token.type, TokenType.INITIAL_FINAL_STATE
@@ -431,7 +444,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(child_node.children[4].token.type, TokenType.LABEL)
         self.assertEqual(child_node.children[4].token.text, "hello world")
         # Test nested label
-        child_node = node.children[7]
+        child_node = nested_declarations_node.children[2]
         self.assertEqual(len(child_node.children), 3)
         self.assertEqual(child_node.children[0].token.type, TokenType.NAME)
         self.assertEqual(child_node.children[0].token.text, "STATE2")
@@ -460,25 +473,25 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_declaration)
-        self.assertEqual(len(node.children), 6)
+        self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
         self.assertEqual(node.children[1].token.type, TokenType.NAME)
         self.assertEqual(node.children[1].token.text, "STATE1")
         self.assertEqual(node.children[2].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[2].token.text, "<<stereotype>>")
-        self.assertEqual(node.children[3].token.type, TokenType.state_declaration)
-        self.assertEqual(node.children[4].token.type, TokenType.transition_declaration)
-        self.assertEqual(node.children[5].token.type, TokenType.state_label)
+        self.assertEqual(node.children[3].token.type, TokenType.declarations)
+        nested_declarations_node = node.children[3]
         # Test nested state
-        child_node = node.children[3]
+        child_node = nested_declarations_node.children[0]
         self.assertEqual(len(child_node.children), 2)
         self.assertEqual(child_node.children[0].token.type, TokenType.KEYWORD_STATE)
         self.assertEqual(child_node.children[1].token.type, TokenType.NAME)
         self.assertEqual(child_node.children[1].token.text, "STATE2")
         # Test nested transition
-        child_node = node.children[4]
+        child_node = nested_declarations_node.children[1]
         self.assertEqual(len(child_node.children), 5)
         self.assertEqual(
             child_node.children[0].token.type, TokenType.INITIAL_FINAL_STATE
@@ -490,7 +503,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(child_node.children[4].token.type, TokenType.LABEL)
         self.assertEqual(child_node.children[4].token.text, "hello world")
         # Test nested label
-        child_node = node.children[5]
+        child_node = nested_declarations_node.children[2]
         self.assertEqual(len(child_node.children), 3)
         self.assertEqual(child_node.children[0].token.type, TokenType.NAME)
         self.assertEqual(child_node.children[0].token.text, "STATE2")
@@ -515,7 +528,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.INITIAL_FINAL_STATE)
@@ -540,7 +554,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.INITIAL_FINAL_STATE)
@@ -567,7 +582,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 5)
         self.assertEqual(node.children[0].token.type, TokenType.INITIAL_FINAL_STATE)
@@ -595,7 +611,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 6)
         self.assertEqual(node.children[0].token.type, TokenType.INITIAL_FINAL_STATE)
@@ -625,7 +642,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -650,7 +668,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -677,7 +696,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 5)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -705,7 +725,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 6)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -735,7 +756,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -761,7 +783,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -789,7 +812,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 5)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -818,7 +842,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 6)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -849,7 +874,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 5)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -878,7 +904,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 6)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -909,7 +936,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 6)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -940,7 +968,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 7)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -973,7 +1002,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 7)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
@@ -1006,7 +1036,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -1031,7 +1062,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -1056,7 +1088,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -1081,7 +1114,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -1106,7 +1140,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -1131,7 +1166,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -1158,7 +1194,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.state_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
@@ -1185,7 +1222,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.comment)
         self.assertEqual(len(node.children), 2)
         self.assertEqual(node.children[0].token.type, TokenType.APOSTROPHE)
@@ -1209,7 +1247,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.comment)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.START_BLOCK_COMMENT)
@@ -1238,7 +1277,8 @@ class TestParser(TestCaseBase):
         with open(file_path, "r") as file:
             parse_tree = parser.parse_puml(file)
 
-        node = parse_tree.root_node.children[1]
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.comment)
         self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.START_BLOCK_COMMENT)
