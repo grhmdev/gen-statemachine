@@ -117,7 +117,7 @@ class Parser:
             elif token.type is TokenType.KEYWORD_NOTE:
                 self.parse_note_declaration(self.parse_tree.root_node, token)
             elif token.type in [TokenType.INITIAL_FINAL_STATE, TokenType.NAME]:
-                self.parse_state_transition_or_state_label(
+                self.parse_transition_declaration_or_state_label(
                     self.parse_tree.root_node, token
                 )
 
@@ -143,7 +143,7 @@ class Parser:
 
         return next_token
 
-    def parse_state_transition_or_state_label(
+    def parse_transition_declaration_or_state_label(
         self, parent_node: Node, first_token: Token
     ):
         # Look for arrow or colon to determine production rule
@@ -152,7 +152,7 @@ class Parser:
             tokens_to_skip=[TokenType.WHITESPACE],
         )
         if second_token.type is TokenType.ARROW:
-            self.parse_state_transition(parent_node, first_token, second_token)
+            self.parse_transition_declaration(parent_node, first_token, second_token)
         else:
             self.parse_state_label(parent_node, first_token, second_token)
 
@@ -265,7 +265,9 @@ class Parser:
                 ]:
                     self.parse_comment(state_node, next_token)
                 else:
-                    self.parse_state_transition_or_state_label(state_node, next_token)
+                    self.parse_transition_declaration_or_state_label(
+                        state_node, next_token
+                    )
         elif next_token.type is TokenType.COLON:
             # Look for label
             next_token = self.find_tokens(
@@ -276,13 +278,13 @@ class Parser:
 
         LOGGER.debug("end of state_declaration")
 
-    def parse_state_transition(
+    def parse_transition_declaration(
         self, parent_node: Node, name_token: Token, arrow_token: Token
     ):
-        LOGGER.debug("start of state_transition")
+        LOGGER.debug("start of transition_declaration")
         # Create node for production rule
         transition_token = Token(
-            type=TokenType.state_transition, start_line=name_token.start_line
+            type=TokenType.transition_declaration, start_line=name_token.start_line
         )
         transition_node = parent_node.make_child(transition_token)
 
@@ -338,7 +340,7 @@ class Parser:
         if next_token.type is TokenType.LABEL:
             transition_node.make_child(next_token)
 
-        LOGGER.debug("end of state_transition")
+        LOGGER.debug("end of transition_declaration")
 
     def parse_note_declaration(self, parent_node: Node, first_token: Token):
         LOGGER.debug("start of note_declaration")

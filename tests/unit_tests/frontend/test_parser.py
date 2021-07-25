@@ -410,7 +410,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[4].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[4].token.text, "<<stereotype>>")
         self.assertEqual(node.children[5].token.type, TokenType.state_declaration)
-        self.assertEqual(node.children[6].token.type, TokenType.state_transition)
+        self.assertEqual(node.children[6].token.type, TokenType.transition_declaration)
         self.assertEqual(node.children[7].token.type, TokenType.state_label)
         # Test nested state
         child_node = node.children[5]
@@ -469,7 +469,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[2].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[2].token.text, "<<stereotype>>")
         self.assertEqual(node.children[3].token.type, TokenType.state_declaration)
-        self.assertEqual(node.children[4].token.type, TokenType.state_transition)
+        self.assertEqual(node.children[4].token.type, TokenType.transition_declaration)
         self.assertEqual(node.children[5].token.type, TokenType.state_label)
         # Test nested state
         child_node = node.children[3]
@@ -516,7 +516,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.INITIAL_FINAL_STATE)
         self.assertEqual(node.children[1].token.type, TokenType.ARROW)
@@ -541,7 +541,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.INITIAL_FINAL_STATE)
         self.assertEqual(node.children[1].token.type, TokenType.ARROW)
@@ -568,7 +568,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 5)
         self.assertEqual(node.children[0].token.type, TokenType.INITIAL_FINAL_STATE)
         self.assertEqual(node.children[1].token.type, TokenType.ARROW)
@@ -596,7 +596,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 6)
         self.assertEqual(node.children[0].token.type, TokenType.INITIAL_FINAL_STATE)
         self.assertEqual(node.children[1].token.type, TokenType.ARROW)
@@ -626,7 +626,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
@@ -651,7 +651,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
@@ -678,7 +678,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 5)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
@@ -706,7 +706,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 6)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
@@ -736,7 +736,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 3)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
@@ -762,7 +762,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 4)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
@@ -790,7 +790,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 5)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
@@ -819,7 +819,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 6)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
@@ -850,7 +850,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 5)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
@@ -879,7 +879,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 6)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
@@ -910,7 +910,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 6)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
@@ -941,7 +941,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 7)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
@@ -974,7 +974,7 @@ class TestParser(TestCaseBase):
             parse_tree = parser.parse_puml(file)
 
         node = parse_tree.root_node.children[1]
-        self.assertEqual(node.token.type, TokenType.state_transition)
+        self.assertEqual(node.token.type, TokenType.transition_declaration)
         self.assertEqual(len(node.children), 7)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")

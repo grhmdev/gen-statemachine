@@ -77,7 +77,7 @@ class TokenType(Enum):
     # Enabled : it is on
     state_label = auto()
     # Enabled --> Disabled
-    state_transition = auto()
+    transition_declaration = auto()
     # note right of Disabled
     anchored_note_declaration = auto()
     # note "What is this?" as Note1
