@@ -49,7 +49,7 @@ class ChoiceFactory:
 
     def create_choice(self) -> Choice:
         self.choice = self.statemachine.new_choice()
-        LOGGER.debug(f"Adding {self.choice.id} to model")
+        LOGGER.debug(f"Adding {self.choice.id}")
         self.choice.name = extract_first_token(
             self.state_decl_node, TokenType.NAME
         ).text
@@ -61,11 +61,11 @@ class ChoiceFactory:
         if stereotype_token := find_first_token(
             self.state_decl_node, [TokenType.STEREOTYPE_ANY]
         ):
-            self.state.stereotype = trim_stereotype_text(stereotype_token.text)
+            self.choice.stereotype = trim_stereotype_text(stereotype_token.text)
 
     def add_description(self):
         if label_tokens := find_all_tokens(self.state_decl_node, [TokenType.LABEL]):
-            self.state.description = label_tokens[-1].text
+            self.choice.description = label_tokens[-1].text
 
 
 class StateFactory:
@@ -77,7 +77,7 @@ class StateFactory:
 
     def create_state(self) -> State:
         self.state = self.statemachine.new_state()
-        LOGGER.debug(f"Adding {self.state.id} to model")
+        LOGGER.debug(f"Adding {self.state.id}")
 
         self.state.name = extract_first_token(self.state_decl_node, TokenType.NAME).text
         self.add_stereotype()
@@ -102,19 +102,14 @@ class StateFactory:
             self.state.description = label_tokens[-1].text
 
     def add_regions(self):
-        open_bracket_node = next(
+        if declarations_node := next(
             filter(
-                lambda n: n.token.type is TokenType.OPEN_CURLY_BRACKET,
+                lambda c: c.token.type is TokenType.declarations,
                 self.state_decl_node.children,
             ),
             None,
-        )
-        if open_bracket_node:
-            index_of_open_bracket = self.state_decl_node.children.index(
-                open_bracket_node
-            )
-            nested_nodes = self.state_decl_node.children[index_of_open_bracket:]
-            region_factory = RegionFactory(self.statemachine, nested_nodes)
+        ):
+            region_factory = RegionFactory(self.statemachine, declarations_node)
             sub_region = region_factory.create_region()
             self.state.regions[sub_region.id] = sub_region
 
@@ -122,15 +117,15 @@ class StateFactory:
 class RegionFactory:
     """Creates `Region` objects from a sequence of PUML expressions"""
 
-    def __init__(self, statemachine: StateMachine, region_nodes: List[ParseTreeNode]):
+    def __init__(self, statemachine: StateMachine, declarations_node: ParseTreeNode):
         self.statemachine = statemachine
-        self.nodes = region_nodes
+        self.declarations_node = declarations_node
 
     def create_region(self) -> Region:
         self.region = self.statemachine.new_region()
-        LOGGER.debug(f"Adding {self.region.id} to model")
+        LOGGER.debug(f"Adding {self.region.id}")
 
-        for node in self.nodes:
+        for node in self.declarations_node.children:
             if not node.token:
                 raise RuntimeError(f"Node found without token")
 
@@ -167,15 +162,19 @@ class RegionFactory:
     def add_state(self, node: ParseTreeNode):
         factory = StateFactory(self.statemachine, node)
         state = factory.create_state()
+        state.container = self.region
         self.region.states[state.id] = state
 
     def add_choice(self, node: ParseTreeNode):
         factory = ChoiceFactory(self.statemachine, node)
         choice = factory.create_choice()
+        choice.container = self.region
         self.region.choices[choice.id] = choice
 
 
 class ModelFactory:
+    """Generates a new `StateMachine` object from a ParseTree"""
+
     def __init__(self):
         self.statemachine: StateMachine = None
 
@@ -184,7 +183,14 @@ class ModelFactory:
         self.statemachine = StateMachine(id="statemachine")
         self.statemachine.name = "statemachine"
 
-        region_factory = RegionFactory(self.statemachine, parse_tree.root_node.children)
+        # Each statemachine starts with a top level region container
+        declarations_node = next(
+            filter(
+                lambda c: c.token.type is TokenType.declarations,
+                parse_tree.root_node.children,
+            )
+        )
+        region_factory = RegionFactory(self.statemachine, declarations_node)
         self.statemachine.region = region_factory.create_region()
 
         return self.statemachine

@@ -7,21 +7,14 @@ from gen_statemachine.frontend import Token, TokenType, ParseTree
 
 
 class TestModelFactory(TestCaseBase):
-    def test_empty_tree(self):
-        """Test an empty parse tree"""
-        parse_tree = ParseTree()
-
-        factory = ModelFactory()
-        statemachine = factory.new_statemachine(parse_tree)
-
-        region1 = statemachine.entities["statemachine.region1"]
-        self.assertEqual(len(region1.states), 0)
-        self.assertTrue(region1 is statemachine.region)
-
     def test_simple_state_declaration(self):
         """Test a parse tree with a simple state declaration"""
+        # Construct tree
         parse_tree = ParseTree()
-        state_declaration_node = parse_tree.root_node.make_child(
+        declarations_node = parse_tree.root_node.make_child(
+            Token(TokenType.declarations)
+        )
+        state_declaration_node = declarations_node.make_child(
             Token(TokenType.state_declaration)
         )
         state_declaration_node.make_child(Token(TokenType.KEYWORD_STATE))
@@ -34,9 +27,11 @@ class TestModelFactory(TestCaseBase):
             Token(TokenType.LABEL, 0, 0, "descriptive text")
         )
 
+        # Generate statemachine
         factory = ModelFactory()
         statemachine = factory.new_statemachine(parse_tree)
 
+        # Assert
         state1 = statemachine.entities["statemachine.state1"]
         self.assertEqual(state1.name, "STATE")
         self.assertEqual(state1.stereotype, "stereotype text")
@@ -46,14 +41,21 @@ class TestModelFactory(TestCaseBase):
 
     def test_composite_state_declaration(self):
         """Test a parse tree with a composite state declaration"""
+        # Construct tree
         parse_tree = ParseTree()
-        state_declaration_node = parse_tree.root_node.make_child(
+        declarations_node = parse_tree.root_node.make_child(
+            Token(TokenType.declarations)
+        )
+        state_declaration_node = declarations_node.make_child(
             Token(TokenType.state_declaration)
         )
         state_declaration_node.make_child(Token(TokenType.KEYWORD_STATE))
         state_declaration_node.make_child(Token(TokenType.NAME, 0, 0, "STATE1"))
         state_declaration_node.make_child(Token(TokenType.OPEN_CURLY_BRACKET))
-        nested_state_declaration_node = state_declaration_node.make_child(
+        nested_declarations_node = state_declaration_node.make_child(
+            Token(TokenType.declarations)
+        )
+        nested_state_declaration_node = nested_declarations_node.make_child(
             Token(TokenType.state_declaration)
         )
         state_declaration_node.make_child(Token(TokenType.CLOSE_CURLY_BRACKET))
@@ -61,9 +63,11 @@ class TestModelFactory(TestCaseBase):
         nested_state_declaration_node.make_child(Token(TokenType.KEYWORD_STATE))
         nested_state_declaration_node.make_child(Token(TokenType.NAME, 0, 0, "STATE2"))
 
+        # Generate statemachine
         factory = ModelFactory()
         statemachine = factory.new_statemachine(parse_tree)
 
+        # Assert
         state1 = statemachine.entities["statemachine.state1"]
         self.assertEqual(state1.name, "STATE1")
         self.assertEqual(state1.type, StateType.COMPOSITE)
