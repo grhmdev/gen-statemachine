@@ -37,7 +37,7 @@ class TestModelFactory(TestCaseBase):
         self.assertEqual(state1.stereotype, "stereotype text")
         self.assertEqual(state1.description, "descriptive text")
         self.assertEqual(state1.type, StateType.SIMPLE)
-        self.assertTrue(state1 is statemachine.region.states[state1.id])
+        self.assertTrue(state1 is statemachine.region.states[0])
 
     def test_composite_state_declaration(self):
         """Test a parse tree with a composite state declaration"""
@@ -71,15 +71,15 @@ class TestModelFactory(TestCaseBase):
         state1 = statemachine.entities["statemachine.state1"]
         self.assertEqual(state1.name, "STATE1")
         self.assertEqual(state1.type, StateType.COMPOSITE)
-        self.assertTrue(state1 is statemachine.region.states[state1.id])
+        self.assertTrue(state1 is statemachine.region.states[0])
 
         region2 = statemachine.entities["statemachine.region2"]
-        self.assertTrue(region2 is list(state1.regions.values())[0])
+        self.assertTrue(region2 is state1.regions[0])
 
         state2 = statemachine.entities["statemachine.state2"]
         self.assertEqual(state2.name, "STATE2")
         self.assertEqual(state2.type, StateType.SIMPLE)
-        self.assertTrue(state2 is list(region2.states.values())[0])
+        self.assertTrue(state2 is region2.states[0])
 
 
 if __name__ == "__main__":

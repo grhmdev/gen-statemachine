@@ -3,7 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Union, Type, cast
 from enum import Enum
+from datetime import datetime
 
+MODEL_VERSION_MAJOR = 1
+MODEL_VERSION_MINOR = 0
 
 @dataclass
 class Entity:
@@ -67,7 +70,7 @@ class State(Vertex):
     type: StateType = StateType.INVALID
     entry_actions: List[Action] = field(default_factory=list)
     exit_actions: List[Action] = field(default_factory=list)
-    regions: Dict[Id, Region] = field(default_factory=dict)
+    regions: List[Id, Region] = field(default_factory=list)
 
 
 @dataclass
@@ -92,17 +95,24 @@ class FinalState(State):
 
 @dataclass
 class Region(Entity):
-    states: Dict[Id, State] = field(default_factory=dict)
-    transitions: Dict[Id, Transition] = field(default_factory=dict)
-    choices: Dict[Id, Choice] = field(default_factory=dict)
+    states: List[Id, State] = field(default_factory=list)
+    transitions: List[Id, Transition] = field(default_factory=list)
+    choices: List[Id, Choice] = field(default_factory=list)
 
     def is_empty(self) -> bool:
         """Does this region own any entities?"""
         return not (self.states or self.transitions or self.choices)
 
+@dataclass
+class Metadata:
+    model_version_major: int = MODEL_VERSION_MAJOR
+    model_version_minor: int = MODEL_VERSION_MINOR
+    generated_on: datetime = datetime.now()
+    source_diagram: Optional[str] = None
 
 @dataclass
 class StateMachine(Entity):
+    metadata: Metadata = Metadata()
     region: Optional[Region] = None
     entities: Dict[Id, AnyEntity] = field(default_factory=dict)
 
@@ -131,6 +141,12 @@ class StateMachine(Entity):
 
     def new_state(self) -> State:
         return cast(State, self._new_entity(State))
+
+    def new_initial_state(self) -> InitialState:
+        return cast(InitialState, self._new_entity(InitialState))
+
+    def new_final_state(self) -> FinalState:
+        return cast(FinalState, self._new_entity(FinalState))
 
     def new_region(self) -> Region:
         return cast(Region, self._new_entity(Region))

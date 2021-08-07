@@ -111,7 +111,7 @@ class StateFactory:
         ):
             region_factory = RegionFactory(self.statemachine, declarations_node)
             sub_region = region_factory.create_region()
-            self.state.regions[sub_region.id] = sub_region
+            self.state.regions.append(sub_region)
 
 
 class RegionFactory:
@@ -163,13 +163,13 @@ class RegionFactory:
         factory = StateFactory(self.statemachine, node)
         state = factory.create_state()
         state.container = self.region
-        self.region.states[state.id] = state
+        self.region.states.append(state)
 
     def add_choice(self, node: ParseTreeNode):
         factory = ChoiceFactory(self.statemachine, node)
         choice = factory.create_choice()
         choice.container = self.region
-        self.region.choices[choice.id] = choice
+        self.region.choices.append(choice)
 
 
 class ModelFactory:
