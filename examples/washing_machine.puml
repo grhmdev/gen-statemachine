@@ -29,7 +29,7 @@ WASHING --> RINSING
 RINSING --> SPINNING
 SPINNING --> do_drying_choice
 do_drying_choice --> DRYING : [self.program == 3]
-PRE_DRYING --> PROGRAM_ENDED
+do_drying_choice --> PROGRAM_ENDED
 DRYING --> PROGRAM_ENDED
 
 PROGRAM_ENDED --> exit

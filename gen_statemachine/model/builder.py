@@ -118,8 +118,15 @@ class TransitionBuilder:
 
     def __init__(self, statemachine: StateMachine, transition_decl_node: ParseTreeNode):
         self.statemachine = statemachine
-        self.model_vertices = self.statemachine.vertices().values()
+        self.model_vertices = list(self.statemachine.vertices().values())
         self.transition_decl_node = transition_decl_node
+        self.transition_label_node = next(
+            filter(
+                lambda n: n.token.type is TokenType.transition_label,
+                self.transition_decl_node.children,
+            ),
+            None,
+        )
 
     def build(self) -> Transition:
         self.transition = self.statemachine.new_transition()
@@ -127,8 +134,10 @@ class TransitionBuilder:
 
         self.add_source_and_target()
         self.add_stereotype()
-
-        # TODO: add events, guards, actions
+        if self.transition_label_node:
+            self.add_event()
+            self.add_guard()
+            self.add_action()
         return self.transition
 
     def add_stereotype(self):
@@ -168,14 +177,26 @@ class TransitionBuilder:
             # TODO [*]
             pass
 
-    def add_event(self, event_text: str):
-        pass
+    def add_event(self):
+        if event_token := find_first_token(
+            self.transition_label_node, [TokenType.TRIGGER]
+        ):
+            self.transition.trigger = self.statemachine.new_event()
+            self.transition.trigger.name = event_token.text
 
-    def add_guard(self, guard_text: str):
-        pass
+    def add_guard(self):
+        if guard_token := find_first_token(
+            self.transition_label_node, [TokenType.GUARD]
+        ):
+            self.transition.guard = self.statemachine.new_guard()
+            self.transition.guard.condition = guard_token.text
 
-    def add_action(self, action_text: str):
-        pass
+    def add_action(self):
+        if action_token := find_first_token(
+            self.transition_label_node, [TokenType.BEHAVIOR]
+        ):
+            self.transition.action = self.statemachine.new_event()
+            self.transition.action.text = action_token.text
 
 
 class RegionBuilder:

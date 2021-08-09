@@ -80,7 +80,7 @@ class TestModelBuilder(TestCaseBase):
         self.assertTrue(state2 is region2.states[0])
 
     def test_transition_within_region(self):
-        """Test a parse tree with a simple transition"""
+        """Test a parse tree with a transition with an event, guard and action"""
         # Construct tree
         parse_tree = ParseTree()
         declarations_node = parse_tree.root_node.make_child(
@@ -107,6 +107,15 @@ class TestModelBuilder(TestCaseBase):
         transition1_declaration.make_child(
             Token(TokenType.STEREOTYPE_ANY, 0, 0, "<<stereotype>>")
         )
+        transition1_declaration.make_child(Token(TokenType.COLON))
+        transition1_label = transition1_declaration.make_child(
+            Token(TokenType.transition_label)
+        )
+        transition1_label.make_child(Token(TokenType.TRIGGER, 0, 0, "evDoSomething"))
+        transition1_label.make_child(Token(TokenType.OPEN_SQ_BRACKET))
+        transition1_label.make_child(Token(TokenType.GUARD, 0, 0, "Hulk > Thor"))
+        transition1_label.make_child(Token(TokenType.CLOSE_SQ_BRACKET))
+        transition1_label.make_child(Token(TokenType.BEHAVIOR, 0, 0, "do_something();"))
 
         # Generate statemachine
         statemachine = ModelBuilder().build(parse_tree)
@@ -118,9 +127,9 @@ class TestModelBuilder(TestCaseBase):
         self.assertEqual(transition1.source, state1)
         self.assertEqual(transition1.target, state2)
         self.assertEqual(transition1.stereotype, "stereotype")
-        self.assertIsNone(transition1.trigger)
-        self.assertIsNone(transition1.guard)
-        self.assertIsNone(transition1.action)
+        self.assertEqual(transition1.trigger.name, "evDoSomething")
+        self.assertEqual(transition1.guard.condition, "Hulk > Thor")
+        self.assertEqual(transition1.action.text, "do_something();")
 
         self.assertEqual(len(state1.outgoing_transitions), 1)
         self.assertEqual(state1.outgoing_transitions[0], transition1)
