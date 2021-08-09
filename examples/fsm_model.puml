@@ -3,9 +3,11 @@
 ' Use orthoganal arrows
 skinparam linetype ortho
 ' Set box spacing in the X plane
-skinparam nodesep 50
+skinparam nodesep 100
 ' Set box spacing in the Y plane
-skinparam ranksep 50
+skinparam ranksep 100
+
+title Statemachine Model v1.0
 
 ' Classes
 class StateType <<Enum>> {
@@ -17,11 +19,11 @@ class Entity {
     id: str
     description: Optional[str]
 }
-class StateMachine {
+class StateMachine <<Entity>> {
 
 }
-class Region
-class Vertex {
+class Region <<Entity>>
+class Vertex <<Entity>> {
     stereotype: Optional[str]
 }
 class State {
@@ -33,35 +35,31 @@ class PseudoState {
 
 }
 class Choice
-class Transition {
+class Transition <<Entity>> {
     stereotype: Optional[str]
 }
-class Event {
+class Event <<Entity>> {
     text: str
 }
-class Guard {
+class Guard <<Entity>> {
     condition: str
 }
-class Action {
+class Action <<Entity>> {
     text: str
 }
 ' StateMachine relations
-Entity <|-- StateMachine
-StateMachine "1..*" *-- "1" Region
+StateMachine "1..*" *-right- "1" Region
 
 ' Region relations
-Entity <|-- Region
-Region "0..*" *-- "1" Vertex
-Region "0..*" *-- Transition
+Region "1" *-right- "0..*" Vertex
+Region *-- "0..*" Transition
 
 ' Vertex relations
-Entity <|-- Vertex
-Vertex "0..*" o-- "2" Transition
+Vertex "2" o-- "0..*" Transition
 
 ' State relations
 Vertex <|-- State
-State "0..2" *-- Action 
-
+State *-- "0..2" Action 
 State <|-- InitialState
 State <|-- FinalState
 
@@ -69,19 +67,9 @@ State <|-- FinalState
 Vertex <|-- PseudoState
 PseudoState <|-- Choice
 
-' Event relations
-Entity <|-- Event
-
-' Guard relations
-Entity <|-- Guard
-
-' Action relations
-Entity <|-- Action
-
 ' Transition relations
-Entity <|-- Transition
-Transition "0..1" *-- Event
-Transition "0..1" *-- Guard
-Transition "0..1" *-- Action
+Transition *-- "0..1" Event
+Transition *-- "0..1" Guard
+Transition *-- "0..1" Action
 
 @enduml

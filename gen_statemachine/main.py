@@ -29,8 +29,10 @@ class Program:
             try:
                 parse_tree = self.parser.parse_puml(file)
                 LOGGER.debug(f"Generated parse tree:\n{parse_tree}")
+                statemachine_model = self.model_factory.new_statemachine(parse_tree)
             except frontend.ParseError as e:
                 LOGGER.exception(e)
+
 
 
 if __name__ == "__main__":

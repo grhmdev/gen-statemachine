@@ -113,6 +113,63 @@ class StateFactory:
             sub_region = region_factory.create_region()
             self.state.regions.append(sub_region)
 
+class TransitionFactory:
+    """Creates `Transition` objects from transition_declaration expressions"""
+
+    def __init__(self, statemachine: StateMachine, transition_decl_node: ParseTreeNode):
+        self.statemachine = statemachine
+        self.model_vertices = self.statemachine.vertices().values()
+        self.transition_decl_node = transition_decl_node
+
+    def create_transition(self) -> Transition:
+        self.transition = self.statemachine.new_transition()
+        LOGGER.debug(f"Adding {self.transition.id}")
+
+        self.add_source_and_target()
+        self.add_stereotype()
+        
+        # TODO: add events, guards, actions
+        return self.transition
+    
+    def add_stereotype(self):
+        if stereotype_token := find_first_token(
+            self.transition_decl_node, [TokenType.STEREOTYPE_ANY]
+        ):
+            self.transition.stereotype = trim_stereotype_text(stereotype_token.text)
+
+    def add_source_and_target(self):
+        vertex_tokens = find_all_tokens(self.transition_decl_node, [TokenType.NAME, TokenType.INITIAL_FINAL_STATE])
+        assert(len(vertex_tokens) == 2)
+
+        source_token = vertex_tokens[0]
+        target_token = vertex_tokens[1]
+
+        if source_token.type is TokenType.NAME:
+            source_name = source_token.text
+            source_vertex = next(filter(lambda e: e.name == source_name, self.model_vertices))
+            self.transition.source = source_vertex
+            source_vertex.outgoing_transitions.append(self.transition)
+        else:
+            # TODO [*]
+            pass
+
+        if target_token.type is TokenType.NAME:
+            target_name = target_token.text
+            target_vertex = next(filter(lambda e: e.name == target_name, self.model_vertices))
+            self.transition.target = target_vertex
+            target_vertex.incoming_transitions.append(self.transition)
+        else:
+            # TODO [*]
+            pass
+
+    def add_event(self, event_text: str):
+        pass
+
+    def add_guard(self, guard_text: str):
+        pass
+
+    def add_action(self, action_text: str):
+        pass
 
 class RegionFactory:
     """Creates `Region` objects from a sequence of PUML expressions"""
@@ -150,10 +207,11 @@ class RegionFactory:
                     TokenType.STEREOTYPE_EXPANSION_INPUT,
                     TokenType.STEREOTYPE_EXPANSION_OUTPUT,
                 ]:
-                    # TODO:
-                    pass
+                    self.add_state(node)
                 else:
                     raise RuntimeError(f"Unhandled stereotype {stereotype_token.type}")
+            elif node.token.type is TokenType.transition_declaration:
+                self.add_transition(node)
             else:
                 LOGGER.debug(f"Skipping {node.token}")
 
@@ -171,6 +229,10 @@ class RegionFactory:
         choice.container = self.region
         self.region.choices.append(choice)
 
+    def add_transition(self, node: ParseTreeNode):
+        factory = TransitionFactory(self.statemachine, node)
+        transition = factory.create_transition()
+        self.region.transitions.append(transition)
 
 class ModelFactory:
     """Generates a new `StateMachine` object from a ParseTree"""

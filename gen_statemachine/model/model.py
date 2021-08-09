@@ -116,8 +116,14 @@ class StateMachine(Entity):
     region: Optional[Region] = None
     entities: Dict[Id, AnyEntity] = field(default_factory=dict)
 
-    def _filter_entities(self, EntityType: Type[AnyEntity]) -> Dict[str, AnyEntity]:
-        return dict(filter(lambda t: type(t[1]) is EntityType, self.entities.items()))
+    def _filter_entities(self, EntityType: Type[AnyEntity], include_subclasses = False) -> Dict[str, AnyEntity]:
+        if include_subclasses:
+            select = lambda entity: isinstance(entity, EntityType)
+        else:
+            select = lambda entity: type(entity) is EntityType
+
+        return dict(filter(lambda e: select(e[1]), self.entities.items()))
+
 
     def _gen_entity_id(self, EntityType: Type[AnyEntity]) -> Id:
         return f"{self.id}.{EntityType.__name__.lower()}{len(self._filter_entities(EntityType)) + 1}"
@@ -135,6 +141,9 @@ class StateMachine(Entity):
 
     def choices(self) -> Dict[Id, Choice]:
         return cast(Dict[Id, Choice], self._filter_entities(Choice))
+
+    def vertices(self) -> Dict[Id, Vertex]:
+        return cast(Dict[Id, Choice], self._filter_entities(Vertex, include_subclasses=True))
 
     def transitions(self) -> Dict[Id, Transition]:
         return cast(Dict[Id, Transition], self._filter_entities(Transition))

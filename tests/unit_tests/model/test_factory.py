@@ -81,6 +81,52 @@ class TestModelFactory(TestCaseBase):
         self.assertEqual(state2.type, StateType.SIMPLE)
         self.assertTrue(state2 is region2.states[0])
 
+    def test_transition_within_region(self):
+        """Test a parse tree with a simple transition"""
+        # Construct tree
+        parse_tree = ParseTree()
+        declarations_node = parse_tree.root_node.make_child(
+            Token(TokenType.declarations)
+        )
+        state1_declaration = declarations_node.make_child(
+            Token(TokenType.state_declaration)
+        )
+        state1_declaration.make_child(Token(TokenType.KEYWORD_STATE))
+        state1_declaration.make_child(Token(TokenType.NAME, 0, 0, "STATE1"))
+
+        state2_declaration = declarations_node.make_child(
+            Token(TokenType.state_declaration)
+        )
+        state2_declaration.make_child(Token(TokenType.KEYWORD_STATE))
+        state2_declaration.make_child(Token(TokenType.NAME, 0, 0, "STATE2"))
+
+        transition1_declaration = declarations_node.make_child(
+            Token(TokenType.transition_declaration)
+        )
+        transition1_declaration.make_child(Token(TokenType.NAME, 0, 0, "STATE1"))
+        transition1_declaration.make_child(Token(TokenType.ARROW))
+        transition1_declaration.make_child(Token(TokenType.NAME, 0, 0, "STATE2"))
+        transition1_declaration.make_child(Token(TokenType.STEREOTYPE_ANY, 0, 0, "<<stereotype>>"))
+
+        # Generate statemachine
+        factory = ModelFactory()
+        statemachine = factory.new_statemachine(parse_tree)
+
+        # Assert
+        state1 = statemachine.region.states[0]
+        state2 = statemachine.region.states[1]
+        transition1 = statemachine.region.transitions[0]
+        self.assertEqual(transition1.source, state1)
+        self.assertEqual(transition1.target, state2)
+        self.assertEqual(transition1.stereotype, "stereotype")
+        self.assertIsNone(transition1.trigger)
+        self.assertIsNone(transition1.guard)
+        self.assertIsNone(transition1.action)
+
+        self.assertEqual(len(state1.outgoing_transitions), 1)
+        self.assertEqual(state1.outgoing_transitions[0], transition1)
+        self.assertEqual(len(state2.incoming_transitions), 1)
+        self.assertEqual(state2.incoming_transitions[0], transition1)
 
 if __name__ == "__main__":
     unittest.main()
