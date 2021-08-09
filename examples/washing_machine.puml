@@ -1,0 +1,38 @@
+@startuml
+
+
+state POWERED_OFF : print("Entered POWERED_OFF")
+state POWERED_ON : print("Entered POWERED_ON")
+state POWERED_ON {
+    state PROGRAM_SELECT : self.program = input("Select program (1=Wash Cycle, 2=Dry Cycle, 3=Wash and Dry Cycle): ")
+    state WASHING : print("Washing..")
+    state RINSING : print("Rinsing..")
+    state SPINNING : print("Spinning..")
+    state do_drying_choice <<choice>>
+    state DRYING : print("Drying..")
+    state PROGRAM_ENDED : print("Program ended")
+    state exit <<exitPoint>>
+}
+
+[*] --> POWERED_OFF
+POWERED_OFF --> POWERED_ON : /print("Powering on..")
+
+state POWERED_ON {
+    [*] --> PROGRAM_SELECT
+}
+PROGRAM_SELECT --> WASHING : [self.program == 1 or self.program == 3]
+PROGRAM_SELECT --> DRYING : [self.program == 2]
+PROGRAM_SELECT --> PROGRAM_SELECT : /print("Program not recognised")
+
+WASHING --> RINSING
+RINSING --> SPINNING
+SPINNING --> do_drying_choice
+do_drying_choice --> DRYING : [self.program == 3]
+PRE_DRYING --> PROGRAM_ENDED
+DRYING --> PROGRAM_ENDED
+
+PROGRAM_ENDED --> exit
+exit --> POWERED_OFF : /print("Powering off..")
+
+
+@enduml
