@@ -35,7 +35,7 @@ class TokenType(Enum):
     # this is a label
     LABEL = auto()
     # [a > b]
-    CONDITION = auto()
+    GUARD = auto()
     # :
     COLON = auto()
     # {
@@ -102,7 +102,7 @@ patterns = {
     TokenType.ARROW: r"^-(up|down|left|right)?(\[.*\])?->\Z",
     TokenType.NAME: r"^[a-zA-Z0-9_]+\Z",
     TokenType.LABEL: r"^(?! )[a-zA-Z0-9 ?!,.\(\)\\/]+\Z",
-    TokenType.CONDITION: r"^\[.+\]\Z",
+    TokenType.GUARD: r"^\[.+\]\Z",
     TokenType.COLON: r"^:\Z",
     TokenType.OPEN_CURLY_BRACKET: r"^{\Z",
     TokenType.CLOSE_CURLY_BRACKET: r"^}\Z",

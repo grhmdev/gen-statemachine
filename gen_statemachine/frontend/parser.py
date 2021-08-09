@@ -340,11 +340,11 @@ class Parser:
 
         # Look for [condition] or label
         next_token = self._find_tokens(
-            tokens_to_find=[TokenType.CONDITION, TokenType.LABEL],
+            tokens_to_find=[TokenType.GUARD, TokenType.LABEL],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
 
-        if next_token.type is TokenType.CONDITION:
+        if next_token.type is TokenType.GUARD:
             transition_node.make_child(next_token)
             # Look for label or newline
             next_token = self._find_tokens(

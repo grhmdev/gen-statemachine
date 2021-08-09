@@ -884,7 +884,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[2].token.type, TokenType.NAME)
         self.assertEqual(node.children[2].token.text, "STATE2")
         self.assertEqual(node.children[3].token.type, TokenType.COLON)
-        self.assertEqual(node.children[4].token.type, TokenType.CONDITION)
+        self.assertEqual(node.children[4].token.type, TokenType.GUARD)
         self.assertEqual(node.children[4].token.text, "[Hulk > Thor]")
 
     def test_state_conditional_transition_with_stereotype(self):
@@ -916,7 +916,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[3].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[3].token.text, "<<stereotype>>")
         self.assertEqual(node.children[4].token.type, TokenType.COLON)
-        self.assertEqual(node.children[5].token.type, TokenType.CONDITION)
+        self.assertEqual(node.children[5].token.type, TokenType.GUARD)
         self.assertEqual(node.children[5].token.text, "[Hulk > Thor]")
 
     def test_state_conditional_transition_with_label(self):
@@ -946,7 +946,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[2].token.type, TokenType.NAME)
         self.assertEqual(node.children[2].token.text, "STATE2")
         self.assertEqual(node.children[3].token.type, TokenType.COLON)
-        self.assertEqual(node.children[4].token.type, TokenType.CONDITION)
+        self.assertEqual(node.children[4].token.type, TokenType.GUARD)
         self.assertEqual(node.children[4].token.text, "[Hulk > Thor]")
         self.assertEqual(node.children[5].token.type, TokenType.LABEL)
         self.assertEqual(node.children[5].token.text, "hello world")
@@ -980,7 +980,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[3].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[3].token.text, "<<stereotype>>")
         self.assertEqual(node.children[4].token.type, TokenType.COLON)
-        self.assertEqual(node.children[5].token.type, TokenType.CONDITION)
+        self.assertEqual(node.children[5].token.type, TokenType.GUARD)
         self.assertEqual(node.children[5].token.text, "[Hulk > Thor]")
         self.assertEqual(node.children[6].token.type, TokenType.LABEL)
         self.assertEqual(node.children[6].token.text, "hello world")
@@ -1014,7 +1014,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[3].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[3].token.text, "<<stereotype>>")
         self.assertEqual(node.children[4].token.type, TokenType.COLON)
-        self.assertEqual(node.children[5].token.type, TokenType.CONDITION)
+        self.assertEqual(node.children[5].token.type, TokenType.GUARD)
         self.assertEqual(node.children[5].token.text, "[Hulk > Thor]")
         self.assertEqual(node.children[6].token.type, TokenType.LABEL)
         self.assertEqual(node.children[6].token.text, "hello world")
