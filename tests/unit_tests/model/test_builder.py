@@ -2,11 +2,11 @@ import unittest
 from tests.utilities import TestCaseBase
 
 from gen_statemachine.model.model import StateType
-from gen_statemachine.model import ModelFactory
+from gen_statemachine.model import ModelBuilder
 from gen_statemachine.frontend import Token, TokenType, ParseTree
 
 
-class TestModelFactory(TestCaseBase):
+class TestModelBuilder(TestCaseBase):
     def test_simple_state_declaration(self):
         """Test a parse tree with a simple state declaration"""
         # Construct tree
@@ -28,8 +28,7 @@ class TestModelFactory(TestCaseBase):
         )
 
         # Generate statemachine
-        factory = ModelFactory()
-        statemachine = factory.new_statemachine(parse_tree)
+        statemachine = ModelBuilder().build(parse_tree)
 
         # Assert
         state1 = statemachine.entities["statemachine.state1"]
@@ -64,8 +63,7 @@ class TestModelFactory(TestCaseBase):
         nested_state_declaration_node.make_child(Token(TokenType.NAME, 0, 0, "STATE2"))
 
         # Generate statemachine
-        factory = ModelFactory()
-        statemachine = factory.new_statemachine(parse_tree)
+        statemachine = ModelBuilder().build(parse_tree)
 
         # Assert
         state1 = statemachine.entities["statemachine.state1"]
@@ -106,11 +104,12 @@ class TestModelFactory(TestCaseBase):
         transition1_declaration.make_child(Token(TokenType.NAME, 0, 0, "STATE1"))
         transition1_declaration.make_child(Token(TokenType.ARROW))
         transition1_declaration.make_child(Token(TokenType.NAME, 0, 0, "STATE2"))
-        transition1_declaration.make_child(Token(TokenType.STEREOTYPE_ANY, 0, 0, "<<stereotype>>"))
+        transition1_declaration.make_child(
+            Token(TokenType.STEREOTYPE_ANY, 0, 0, "<<stereotype>>")
+        )
 
         # Generate statemachine
-        factory = ModelFactory()
-        statemachine = factory.new_statemachine(parse_tree)
+        statemachine = ModelBuilder().build(parse_tree)
 
         # Assert
         state1 = statemachine.region.states[0]
@@ -127,6 +126,7 @@ class TestModelFactory(TestCaseBase):
         self.assertEqual(state1.outgoing_transitions[0], transition1)
         self.assertEqual(len(state2.incoming_transitions), 1)
         self.assertEqual(state2.incoming_transitions[0], transition1)
+
 
 if __name__ == "__main__":
     unittest.main()

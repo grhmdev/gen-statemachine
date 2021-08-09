@@ -40,14 +40,14 @@ def trim_stereotype_text(stereotype_text: str) -> str:
     return stereotype_text.strip("<>")
 
 
-class ChoiceFactory:
+class ChoiceBuilder:
     """Creates `ChoicePseudoState` objects from state_declaration expressions"""
 
     def __init__(self, statemachine: StateMachine, state_decl_node: ParseTreeNode):
         self.statemachine = statemachine
         self.state_decl_node = state_decl_node
 
-    def create_choice(self) -> Choice:
+    def build(self) -> Choice:
         self.choice = self.statemachine.new_choice()
         LOGGER.debug(f"Adding {self.choice.id}")
         self.choice.name = extract_first_token(
@@ -68,14 +68,14 @@ class ChoiceFactory:
             self.choice.description = label_tokens[-1].text
 
 
-class StateFactory:
+class StateBuilder:
     """Creates `State` objects from state_declaration and state_alias_declaration expressions"""
 
     def __init__(self, statemachine: StateMachine, state_decl_node: ParseTreeNode):
         self.statemachine = statemachine
         self.state_decl_node = state_decl_node
 
-    def create_state(self) -> State:
+    def build(self) -> State:
         self.state = self.statemachine.new_state()
         LOGGER.debug(f"Adding {self.state.id}")
 
@@ -109,11 +109,11 @@ class StateFactory:
             ),
             None,
         ):
-            region_factory = RegionFactory(self.statemachine, declarations_node)
-            sub_region = region_factory.create_region()
+            sub_region = RegionBuilder(self.statemachine, declarations_node).build()
             self.state.regions.append(sub_region)
 
-class TransitionFactory:
+
+class TransitionBuilder:
     """Creates `Transition` objects from transition_declaration expressions"""
 
     def __init__(self, statemachine: StateMachine, transition_decl_node: ParseTreeNode):
@@ -121,16 +121,16 @@ class TransitionFactory:
         self.model_vertices = self.statemachine.vertices().values()
         self.transition_decl_node = transition_decl_node
 
-    def create_transition(self) -> Transition:
+    def build(self) -> Transition:
         self.transition = self.statemachine.new_transition()
         LOGGER.debug(f"Adding {self.transition.id}")
 
         self.add_source_and_target()
         self.add_stereotype()
-        
+
         # TODO: add events, guards, actions
         return self.transition
-    
+
     def add_stereotype(self):
         if stereotype_token := find_first_token(
             self.transition_decl_node, [TokenType.STEREOTYPE_ANY]
@@ -138,15 +138,19 @@ class TransitionFactory:
             self.transition.stereotype = trim_stereotype_text(stereotype_token.text)
 
     def add_source_and_target(self):
-        vertex_tokens = find_all_tokens(self.transition_decl_node, [TokenType.NAME, TokenType.INITIAL_FINAL_STATE])
-        assert(len(vertex_tokens) == 2)
+        vertex_tokens = find_all_tokens(
+            self.transition_decl_node, [TokenType.NAME, TokenType.INITIAL_FINAL_STATE]
+        )
+        assert len(vertex_tokens) == 2
 
         source_token = vertex_tokens[0]
         target_token = vertex_tokens[1]
 
         if source_token.type is TokenType.NAME:
             source_name = source_token.text
-            source_vertex = next(filter(lambda e: e.name == source_name, self.model_vertices))
+            source_vertex = next(
+                filter(lambda e: e.name == source_name, self.model_vertices)
+            )
             self.transition.source = source_vertex
             source_vertex.outgoing_transitions.append(self.transition)
         else:
@@ -155,7 +159,9 @@ class TransitionFactory:
 
         if target_token.type is TokenType.NAME:
             target_name = target_token.text
-            target_vertex = next(filter(lambda e: e.name == target_name, self.model_vertices))
+            target_vertex = next(
+                filter(lambda e: e.name == target_name, self.model_vertices)
+            )
             self.transition.target = target_vertex
             target_vertex.incoming_transitions.append(self.transition)
         else:
@@ -171,14 +177,15 @@ class TransitionFactory:
     def add_action(self, action_text: str):
         pass
 
-class RegionFactory:
+
+class RegionBuilder:
     """Creates `Region` objects from a sequence of PUML expressions"""
 
     def __init__(self, statemachine: StateMachine, declarations_node: ParseTreeNode):
         self.statemachine = statemachine
         self.declarations_node = declarations_node
 
-    def create_region(self) -> Region:
+    def build(self) -> Region:
         self.region = self.statemachine.new_region()
         LOGGER.debug(f"Adding {self.region.id}")
 
@@ -218,29 +225,27 @@ class RegionFactory:
         return self.region
 
     def add_state(self, node: ParseTreeNode):
-        factory = StateFactory(self.statemachine, node)
-        state = factory.create_state()
+        state = StateBuilder(self.statemachine, node).build()
         state.container = self.region
         self.region.states.append(state)
 
     def add_choice(self, node: ParseTreeNode):
-        factory = ChoiceFactory(self.statemachine, node)
-        choice = factory.create_choice()
+        choice = ChoiceBuilder(self.statemachine, node).build()
         choice.container = self.region
         self.region.choices.append(choice)
 
     def add_transition(self, node: ParseTreeNode):
-        factory = TransitionFactory(self.statemachine, node)
-        transition = factory.create_transition()
+        transition = TransitionBuilder(self.statemachine, node).build()
         self.region.transitions.append(transition)
 
-class ModelFactory:
+
+class ModelBuilder:
     """Generates a new `StateMachine` object from a ParseTree"""
 
     def __init__(self):
         self.statemachine: StateMachine = None
 
-    def new_statemachine(self, parse_tree: ParseTree) -> StateMachine:
+    def build(self, parse_tree: ParseTree) -> StateMachine:
         # Create statemachine
         self.statemachine = StateMachine(id="statemachine")
         self.statemachine.name = "statemachine"
@@ -252,7 +257,7 @@ class ModelFactory:
                 parse_tree.root_node.children,
             )
         )
-        region_factory = RegionFactory(self.statemachine, declarations_node)
-        self.statemachine.region = region_factory.create_region()
-
+        self.statemachine.region = RegionBuilder(
+            self.statemachine, declarations_node
+        ).build()
         return self.statemachine

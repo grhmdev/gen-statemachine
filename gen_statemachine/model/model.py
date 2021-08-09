@@ -8,6 +8,7 @@ from datetime import datetime
 MODEL_VERSION_MAJOR = 1
 MODEL_VERSION_MINOR = 0
 
+
 @dataclass
 class Entity:
     id: Id
@@ -70,7 +71,7 @@ class State(Vertex):
     type: StateType = StateType.INVALID
     entry_actions: List[Action] = field(default_factory=list)
     exit_actions: List[Action] = field(default_factory=list)
-    regions: List[Id, Region] = field(default_factory=list)
+    regions: List[Region] = field(default_factory=list)
 
 
 @dataclass
@@ -95,13 +96,14 @@ class FinalState(State):
 
 @dataclass
 class Region(Entity):
-    states: List[Id, State] = field(default_factory=list)
-    transitions: List[Id, Transition] = field(default_factory=list)
-    choices: List[Id, Choice] = field(default_factory=list)
+    states: List[State] = field(default_factory=list)
+    transitions: List[Transition] = field(default_factory=list)
+    choices: List[Choice] = field(default_factory=list)
 
     def is_empty(self) -> bool:
         """Does this region own any entities?"""
         return not (self.states or self.transitions or self.choices)
+
 
 @dataclass
 class Metadata:
@@ -110,20 +112,22 @@ class Metadata:
     generated_on: datetime = datetime.now()
     source_diagram: Optional[str] = None
 
+
 @dataclass
 class StateMachine(Entity):
     metadata: Metadata = Metadata()
     region: Optional[Region] = None
     entities: Dict[Id, AnyEntity] = field(default_factory=dict)
 
-    def _filter_entities(self, EntityType: Type[AnyEntity], include_subclasses = False) -> Dict[str, AnyEntity]:
+    def _filter_entities(
+        self, EntityType: Type[AnyEntity], include_subclasses=False
+    ) -> Dict[str, AnyEntity]:
         if include_subclasses:
             select = lambda entity: isinstance(entity, EntityType)
         else:
             select = lambda entity: type(entity) is EntityType
 
         return dict(filter(lambda e: select(e[1]), self.entities.items()))
-
 
     def _gen_entity_id(self, EntityType: Type[AnyEntity]) -> Id:
         return f"{self.id}.{EntityType.__name__.lower()}{len(self._filter_entities(EntityType)) + 1}"
@@ -143,7 +147,9 @@ class StateMachine(Entity):
         return cast(Dict[Id, Choice], self._filter_entities(Choice))
 
     def vertices(self) -> Dict[Id, Vertex]:
-        return cast(Dict[Id, Choice], self._filter_entities(Vertex, include_subclasses=True))
+        return cast(
+            Dict[Id, Vertex], self._filter_entities(Vertex, include_subclasses=True)
+        )
 
     def transitions(self) -> Dict[Id, Transition]:
         return cast(Dict[Id, Transition], self._filter_entities(Transition))
@@ -183,6 +189,7 @@ AnyEntity = Union[
     Action,
     Guard,
     Transition,
+    Vertex,
     State,
     Choice,
     InitialState,
