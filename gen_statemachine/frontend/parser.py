@@ -286,7 +286,7 @@ class Parser:
         elif next_token.type is TokenType.COLON:
             # Look for label
             next_token = self._find_tokens(
-                tokens_to_find=[TokenType.LABEL],
+                tokens_to_find=[TokenType.BEHAVIOR],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
             state_node.make_child(next_token)
@@ -338,22 +338,57 @@ class Parser:
 
         transition_node.make_child(next_token)
 
-        # Look for [condition] or label
+        label_node = transition_node.make_child(Token(TokenType.transition_label))
+
+        # Look for trigger, [condition] or /
         next_token = self._find_tokens(
-            tokens_to_find=[TokenType.GUARD, TokenType.LABEL],
+            tokens_to_find=[
+                TokenType.TRIGGER,
+                TokenType.OPEN_SQ_BRACKET,
+                TokenType.FORWARD_SLASH,
+                TokenType.NEWLINE,
+            ],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
 
-        if next_token.type is TokenType.GUARD:
-            transition_node.make_child(next_token)
-            # Look for label or newline
+        if next_token.type is TokenType.TRIGGER:
+            label_node.make_child(next_token)
             next_token = self._find_tokens(
-                tokens_to_find=[TokenType.LABEL, TokenType.NEWLINE],
+                tokens_to_find=[
+                    TokenType.OPEN_SQ_BRACKET,
+                    TokenType.FORWARD_SLASH,
+                    TokenType.NEWLINE,
+                ],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
 
-        if next_token.type is TokenType.LABEL:
-            transition_node.make_child(next_token)
+        if next_token.type is TokenType.OPEN_SQ_BRACKET:
+            label_node.make_child(next_token)
+            next_token = self._find_tokens(
+                tokens_to_find=[TokenType.GUARD],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+            label_node.make_child(next_token)
+
+            next_token = self._find_tokens(
+                tokens_to_find=[TokenType.CLOSE_SQ_BRACKET],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+            label_node.make_child(next_token)
+
+            next_token = self._find_tokens(
+                tokens_to_find=[TokenType.FORWARD_SLASH, TokenType.NEWLINE],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+
+        if next_token.type is TokenType.FORWARD_SLASH:
+            label_node.make_child(next_token)
+            next_token = self._find_tokens(
+                tokens_to_find=[TokenType.BEHAVIOR, TokenType.NEWLINE],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+            if next_token.type is TokenType.BEHAVIOR:
+                label_node.make_child(next_token)
 
         LOGGER.debug("end of transition_declaration")
 
@@ -465,7 +500,7 @@ class Parser:
 
         # Look for label
         next_token = self._find_tokens(
-            tokens_to_find=[TokenType.LABEL],
+            tokens_to_find=[TokenType.BEHAVIOR],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
         state_label_node.make_child(next_token)

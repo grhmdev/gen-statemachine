@@ -34,18 +34,28 @@ class TokenType(Enum):
     NAME = auto()
     # this is a label
     LABEL = auto()
-    # [a > b]
+    # evDoSomething
+    TRIGGER = auto()
+    # a > b
     GUARD = auto()
+    # do_something();
+    BEHAVIOR = auto()
     # :
     COLON = auto()
     # {
     OPEN_CURLY_BRACKET = auto()
     # }
     CLOSE_CURLY_BRACKET = auto()
+    # [
+    OPEN_SQ_BRACKET = auto()
+    # ]
+    CLOSE_SQ_BRACKET = auto()
     # "
     QUOTATION = auto()
     # '
     APOSTROPHE = auto()
+    # /
+    FORWARD_SLASH = auto()
     # /'
     START_BLOCK_COMMENT = auto()
     # '/
@@ -80,6 +90,8 @@ class TokenType(Enum):
     state_label = auto()
     # Enabled --> Disabled
     transition_declaration = auto()
+    # evDoSomething [is_enabled()] / do_something();
+    transition_label = auto()
     # note right of Disabled
     anchored_note_declaration = auto()
     # note "What is this?" as Note1
@@ -102,12 +114,17 @@ patterns = {
     TokenType.ARROW: r"^-(up|down|left|right)?(\[.*\])?->\Z",
     TokenType.NAME: r"^[a-zA-Z0-9_]+\Z",
     TokenType.LABEL: r"^(?! )[a-zA-Z0-9 ?!,.\(\)\\/]+\Z",
-    TokenType.GUARD: r"^\[.+\]\Z",
+    TokenType.TRIGGER: r"^(?! )((?!\[|\/).)+\Z",
+    TokenType.GUARD: r"^(?! )((?!\]|\/).)+\Z",
+    TokenType.BEHAVIOR: r"^(?! ).+\Z",
     TokenType.COLON: r"^:\Z",
     TokenType.OPEN_CURLY_BRACKET: r"^{\Z",
     TokenType.CLOSE_CURLY_BRACKET: r"^}\Z",
+    TokenType.OPEN_SQ_BRACKET: r"^\[\Z",
+    TokenType.CLOSE_SQ_BRACKET: r"^\]\Z",
     TokenType.QUOTATION: r'^"\Z',
     TokenType.APOSTROPHE: r"^'\Z",
+    TokenType.FORWARD_SLASH: r"^/\Z",
     TokenType.START_BLOCK_COMMENT: r"^/'\Z",
     TokenType.END_BLOCK_COMMENT: r"^'/\Z",
     TokenType.KEYWORD_NOTE: r"^note\Z",

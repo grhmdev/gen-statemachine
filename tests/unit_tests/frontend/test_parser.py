@@ -57,7 +57,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
         self.assertEqual(node.children[1].token.type, TokenType.NAME)
         self.assertEqual(node.children[1].token.text, "STATE1")
-        self.assertEqual(node.children[2].token.type, TokenType.LABEL)
+        self.assertEqual(node.children[2].token.type, TokenType.BEHAVIOR)
         self.assertEqual(node.children[2].token.text, "hello world")
 
     def test_state_declaration_with_stereotype(self):
@@ -113,7 +113,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[1].token.text, "STATE1")
         self.assertEqual(node.children[2].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[2].token.text, "<<stereotype>>")
-        self.assertEqual(node.children[3].token.type, TokenType.LABEL)
+        self.assertEqual(node.children[3].token.type, TokenType.BEHAVIOR)
         self.assertEqual(node.children[3].token.text, "hello world")
 
     def test_note_declaration_left_of(self):
@@ -355,7 +355,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[2].token.type, TokenType.KEYWORD_AS)
         self.assertEqual(node.children[3].token.type, TokenType.NAME)
         self.assertEqual(node.children[3].token.text, "STATE1")
-        self.assertEqual(node.children[4].token.type, TokenType.LABEL)
+        self.assertEqual(node.children[4].token.type, TokenType.BEHAVIOR)
         self.assertEqual(node.children[4].token.text, "hello world")
 
     def test_state_alias_with_label_and_stereotype(self):
@@ -387,7 +387,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[3].token.text, "STATE1")
         self.assertEqual(node.children[4].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[4].token.text, "<<stereotype>>")
-        self.assertEqual(node.children[5].token.type, TokenType.LABEL)
+        self.assertEqual(node.children[5].token.type, TokenType.BEHAVIOR)
         self.assertEqual(node.children[5].token.text, "hello world")
 
     def test_composite_state_alias_declaration(self):
@@ -441,16 +441,14 @@ class TestParser(TestCaseBase):
         self.assertEqual(child_node.children[2].token.type, TokenType.NAME)
         self.assertEqual(child_node.children[2].token.text, "STATE1")
         self.assertEqual(child_node.children[3].token.type, TokenType.COLON)
-        self.assertEqual(child_node.children[4].token.type, TokenType.LABEL)
-        self.assertEqual(child_node.children[4].token.text, "hello world")
-        # Test nested label
+        self.assertEqual(child_node.children[4].token.type, TokenType.transition_label)
+        # Test nested state label
         child_node = nested_declarations_node.children[2]
         self.assertEqual(len(child_node.children), 3)
         self.assertEqual(child_node.children[0].token.type, TokenType.NAME)
         self.assertEqual(child_node.children[0].token.text, "STATE2")
         self.assertEqual(child_node.children[1].token.type, TokenType.COLON)
-        self.assertEqual(child_node.children[2].token.type, TokenType.LABEL)
-        self.assertEqual(child_node.children[2].token.text, "label")
+        self.assertEqual(child_node.children[2].token.type, TokenType.BEHAVIOR)
 
     def test_composite_state_declaration(self):
         file_path = self.create_file(
@@ -500,15 +498,14 @@ class TestParser(TestCaseBase):
         self.assertEqual(child_node.children[2].token.type, TokenType.NAME)
         self.assertEqual(child_node.children[2].token.text, "STATE1")
         self.assertEqual(child_node.children[3].token.type, TokenType.COLON)
-        self.assertEqual(child_node.children[4].token.type, TokenType.LABEL)
-        self.assertEqual(child_node.children[4].token.text, "hello world")
-        # Test nested label
+        self.assertEqual(child_node.children[4].token.type, TokenType.transition_label)
+        # Test nested state label
         child_node = nested_declarations_node.children[2]
         self.assertEqual(len(child_node.children), 3)
         self.assertEqual(child_node.children[0].token.type, TokenType.NAME)
         self.assertEqual(child_node.children[0].token.text, "STATE2")
         self.assertEqual(child_node.children[1].token.type, TokenType.COLON)
-        self.assertEqual(child_node.children[2].token.type, TokenType.LABEL)
+        self.assertEqual(child_node.children[2].token.type, TokenType.BEHAVIOR)
         self.assertEqual(child_node.children[2].token.text, "label")
 
     def test_state_transition_from_entry(self):
@@ -591,8 +588,10 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[2].token.type, TokenType.NAME)
         self.assertEqual(node.children[2].token.text, "STATE1")
         self.assertEqual(node.children[3].token.type, TokenType.COLON)
-        self.assertEqual(node.children[4].token.type, TokenType.LABEL)
-        self.assertEqual(node.children[4].token.text, "hello world")
+        label_node = node.children[4]
+        self.assertEqual(len(label_node.children), 1)
+        self.assertEqual(label_node.children[0].token.type, TokenType.TRIGGER)
+        self.assertEqual(label_node.children[0].token.text, "hello world")
 
     def test_state_transition_from_entry_with_label_and_stereotype(self):
         file_path = self.create_file(
@@ -622,8 +621,10 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[3].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[3].token.text, "<<stereotype>>")
         self.assertEqual(node.children[4].token.type, TokenType.COLON)
-        self.assertEqual(node.children[5].token.type, TokenType.LABEL)
-        self.assertEqual(node.children[5].token.text, "hello world")
+        label_node = node.children[5]
+        self.assertEqual(len(label_node.children), 1)
+        self.assertEqual(label_node.children[0].token.type, TokenType.TRIGGER)
+        self.assertEqual(label_node.children[0].token.text, "hello world")
 
     def test_state_transition_to_entry(self):
         file_path = self.create_file(
@@ -705,8 +706,10 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[1].token.type, TokenType.ARROW)
         self.assertEqual(node.children[2].token.type, TokenType.INITIAL_FINAL_STATE)
         self.assertEqual(node.children[3].token.type, TokenType.COLON)
-        self.assertEqual(node.children[4].token.type, TokenType.LABEL)
-        self.assertEqual(node.children[4].token.text, "hello world")
+        label_node = node.children[4]
+        self.assertEqual(len(label_node.children), 1)
+        self.assertEqual(label_node.children[0].token.type, TokenType.TRIGGER)
+        self.assertEqual(label_node.children[0].token.text, "hello world")
 
     def test_state_transition_to_entry_with_label_and_stereotype(self):
         file_path = self.create_file(
@@ -736,8 +739,10 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[3].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[3].token.text, "<<stereotype>>")
         self.assertEqual(node.children[4].token.type, TokenType.COLON)
-        self.assertEqual(node.children[5].token.type, TokenType.LABEL)
-        self.assertEqual(node.children[5].token.text, "hello world")
+        label_node = node.children[5]
+        self.assertEqual(len(label_node.children), 1)
+        self.assertEqual(label_node.children[0].token.type, TokenType.TRIGGER)
+        self.assertEqual(label_node.children[0].token.text, "hello world")
 
     def test_state_transition(self):
         file_path = self.create_file(
@@ -795,7 +800,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[3].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[3].token.text, "<<stereotype>>")
 
-    def test_state_transition_with_label(self):
+    def test_state_transition_label_with_trigger(self):
         file_path = self.create_file(
             contents=dedent(
                 """
@@ -822,42 +827,12 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[2].token.type, TokenType.NAME)
         self.assertEqual(node.children[2].token.text, "STATE2")
         self.assertEqual(node.children[3].token.type, TokenType.COLON)
-        self.assertEqual(node.children[4].token.type, TokenType.LABEL)
-        self.assertEqual(node.children[4].token.text, "hello world")
+        label_node = node.children[4]
+        self.assertEqual(len(label_node.children), 1)
+        self.assertEqual(label_node.children[0].token.type, TokenType.TRIGGER)
+        self.assertEqual(label_node.children[0].token.text, "hello world")
 
-    def test_state_transition_with_label_and_stereotype(self):
-        file_path = self.create_file(
-            contents=dedent(
-                """
-        @startuml
-
-        STATE1 --> STATE2 <<stereotype>> : hello world
-
-        @enduml
-        """
-            )
-        )
-        parser = Parser()
-
-        with open(file_path, "r") as file:
-            parse_tree = parser.parse_puml(file)
-
-        declarations_node = parse_tree.root_node.children[1]
-        node = declarations_node.children[0]
-        self.assertEqual(node.token.type, TokenType.transition_declaration)
-        self.assertEqual(len(node.children), 6)
-        self.assertEqual(node.children[0].token.type, TokenType.NAME)
-        self.assertEqual(node.children[0].token.text, "STATE1")
-        self.assertEqual(node.children[1].token.type, TokenType.ARROW)
-        self.assertEqual(node.children[2].token.type, TokenType.NAME)
-        self.assertEqual(node.children[2].token.text, "STATE2")
-        self.assertEqual(node.children[3].token.type, TokenType.STEREOTYPE_ANY)
-        self.assertEqual(node.children[3].token.text, "<<stereotype>>")
-        self.assertEqual(node.children[4].token.type, TokenType.COLON)
-        self.assertEqual(node.children[5].token.type, TokenType.LABEL)
-        self.assertEqual(node.children[5].token.text, "hello world")
-
-    def test_state_conditional_transition(self):
+    def test_state_transition_label_with_guard(self):
         file_path = self.create_file(
             contents=dedent(
                 """
@@ -884,17 +859,20 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[2].token.type, TokenType.NAME)
         self.assertEqual(node.children[2].token.text, "STATE2")
         self.assertEqual(node.children[3].token.type, TokenType.COLON)
-        self.assertEqual(node.children[4].token.type, TokenType.GUARD)
-        self.assertEqual(node.children[4].token.text, "[Hulk > Thor]")
+        label_node = node.children[4]
+        self.assertEqual(len(label_node.children), 3)
+        self.assertEqual(label_node.children[0].token.type, TokenType.OPEN_SQ_BRACKET)
+        self.assertEqual(label_node.children[1].token.type, TokenType.GUARD)
+        self.assertEqual(label_node.children[1].token.text, "Hulk > Thor")
+        self.assertEqual(label_node.children[2].token.type, TokenType.CLOSE_SQ_BRACKET)
 
-    def test_state_conditional_transition_with_stereotype(self):
+    def test_state_transition_label_with_behavior(self):
         file_path = self.create_file(
             contents=dedent(
                 """
         @startuml
 
-        STATE1 --> STATE2 <<stereotype>> : [Hulk > Thor]
-
+        STATE1 --> STATE2 : /do_something();
         @enduml
         """
             )
@@ -907,57 +885,26 @@ class TestParser(TestCaseBase):
         declarations_node = parse_tree.root_node.children[1]
         node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
-        self.assertEqual(len(node.children), 6)
-        self.assertEqual(node.children[0].token.type, TokenType.NAME)
-        self.assertEqual(node.children[0].token.text, "STATE1")
-        self.assertEqual(node.children[1].token.type, TokenType.ARROW)
-        self.assertEqual(node.children[2].token.type, TokenType.NAME)
-        self.assertEqual(node.children[2].token.text, "STATE2")
-        self.assertEqual(node.children[3].token.type, TokenType.STEREOTYPE_ANY)
-        self.assertEqual(node.children[3].token.text, "<<stereotype>>")
-        self.assertEqual(node.children[4].token.type, TokenType.COLON)
-        self.assertEqual(node.children[5].token.type, TokenType.GUARD)
-        self.assertEqual(node.children[5].token.text, "[Hulk > Thor]")
-
-    def test_state_conditional_transition_with_label(self):
-        file_path = self.create_file(
-            contents=dedent(
-                """
-        @startuml
-
-        STATE1 --> STATE2 : [Hulk > Thor] hello world
-
-        @enduml
-        """
-            )
-        )
-        parser = Parser()
-
-        with open(file_path, "r") as file:
-            parse_tree = parser.parse_puml(file)
-
-        declarations_node = parse_tree.root_node.children[1]
-        node = declarations_node.children[0]
-        self.assertEqual(node.token.type, TokenType.transition_declaration)
-        self.assertEqual(len(node.children), 6)
+        self.assertEqual(len(node.children), 5)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
         self.assertEqual(node.children[1].token.type, TokenType.ARROW)
         self.assertEqual(node.children[2].token.type, TokenType.NAME)
         self.assertEqual(node.children[2].token.text, "STATE2")
         self.assertEqual(node.children[3].token.type, TokenType.COLON)
-        self.assertEqual(node.children[4].token.type, TokenType.GUARD)
-        self.assertEqual(node.children[4].token.text, "[Hulk > Thor]")
-        self.assertEqual(node.children[5].token.type, TokenType.LABEL)
-        self.assertEqual(node.children[5].token.text, "hello world")
+        label_node = node.children[4]
+        self.assertEqual(len(label_node.children), 2)
+        self.assertEqual(label_node.children[0].token.type, TokenType.FORWARD_SLASH)
+        self.assertEqual(label_node.children[1].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(label_node.children[1].token.text, "do_something();")
 
-    def test_state_conditional_transition_with_label_and_stereotype(self):
+    def test_full_state_transition_label(self):
         file_path = self.create_file(
             contents=dedent(
                 """
         @startuml
 
-        STATE1 --> STATE2 <<stereotype>> : [Hulk > Thor] hello world
+        STATE1 --> STATE2 : evDoSomething[Hulk > Thor] / do_something();
 
         @enduml
         """
@@ -971,53 +918,24 @@ class TestParser(TestCaseBase):
         declarations_node = parse_tree.root_node.children[1]
         node = declarations_node.children[0]
         self.assertEqual(node.token.type, TokenType.transition_declaration)
-        self.assertEqual(len(node.children), 7)
+        self.assertEqual(len(node.children), 5)
         self.assertEqual(node.children[0].token.type, TokenType.NAME)
         self.assertEqual(node.children[0].token.text, "STATE1")
         self.assertEqual(node.children[1].token.type, TokenType.ARROW)
         self.assertEqual(node.children[2].token.type, TokenType.NAME)
         self.assertEqual(node.children[2].token.text, "STATE2")
-        self.assertEqual(node.children[3].token.type, TokenType.STEREOTYPE_ANY)
-        self.assertEqual(node.children[3].token.text, "<<stereotype>>")
-        self.assertEqual(node.children[4].token.type, TokenType.COLON)
-        self.assertEqual(node.children[5].token.type, TokenType.GUARD)
-        self.assertEqual(node.children[5].token.text, "[Hulk > Thor]")
-        self.assertEqual(node.children[6].token.type, TokenType.LABEL)
-        self.assertEqual(node.children[6].token.text, "hello world")
-
-    def test_state_conditional_transition_with_label_and_stereotype(self):
-        file_path = self.create_file(
-            contents=dedent(
-                """
-        @startuml
-
-        STATE1 --> STATE2 <<stereotype>> : [Hulk > Thor] hello world
-
-        @enduml
-        """
-            )
-        )
-        parser = Parser()
-
-        with open(file_path, "r") as file:
-            parse_tree = parser.parse_puml(file)
-
-        declarations_node = parse_tree.root_node.children[1]
-        node = declarations_node.children[0]
-        self.assertEqual(node.token.type, TokenType.transition_declaration)
-        self.assertEqual(len(node.children), 7)
-        self.assertEqual(node.children[0].token.type, TokenType.NAME)
-        self.assertEqual(node.children[0].token.text, "STATE1")
-        self.assertEqual(node.children[1].token.type, TokenType.ARROW)
-        self.assertEqual(node.children[2].token.type, TokenType.NAME)
-        self.assertEqual(node.children[2].token.text, "STATE2")
-        self.assertEqual(node.children[3].token.type, TokenType.STEREOTYPE_ANY)
-        self.assertEqual(node.children[3].token.text, "<<stereotype>>")
-        self.assertEqual(node.children[4].token.type, TokenType.COLON)
-        self.assertEqual(node.children[5].token.type, TokenType.GUARD)
-        self.assertEqual(node.children[5].token.text, "[Hulk > Thor]")
-        self.assertEqual(node.children[6].token.type, TokenType.LABEL)
-        self.assertEqual(node.children[6].token.text, "hello world")
+        self.assertEqual(node.children[3].token.type, TokenType.COLON)
+        label_node = node.children[4]
+        self.assertEqual(len(label_node.children), 6)
+        self.assertEqual(label_node.children[0].token.type, TokenType.TRIGGER)
+        self.assertEqual(label_node.children[0].token.text, "evDoSomething")
+        self.assertEqual(label_node.children[1].token.type, TokenType.OPEN_SQ_BRACKET)
+        self.assertEqual(label_node.children[2].token.type, TokenType.GUARD)
+        self.assertEqual(label_node.children[2].token.text, "Hulk > Thor")
+        self.assertEqual(label_node.children[3].token.type, TokenType.CLOSE_SQ_BRACKET)
+        self.assertEqual(label_node.children[4].token.type, TokenType.FORWARD_SLASH)
+        self.assertEqual(label_node.children[5].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(label_node.children[5].token.text, "do_something();")
 
     def test_choice_state_declaration(self):
         file_path = self.create_file(

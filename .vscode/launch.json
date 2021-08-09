@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/gen_statemachine/main.py",
-            "args": ["${workspaceFolder}/examples/full_syntax.puml"],
+            "args": ["${workspaceFolder}/examples/washing_machine.puml"],
             "console": "integratedTerminal"
         }
     ]

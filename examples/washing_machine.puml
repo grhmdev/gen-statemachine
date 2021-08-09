@@ -5,6 +5,7 @@ state POWERED_OFF : print("Entered POWERED_OFF")
 state POWERED_ON : print("Entered POWERED_ON")
 state POWERED_ON {
     state PROGRAM_SELECT : self.program = input("Select program (1=Wash Cycle, 2=Dry Cycle, 3=Wash and Dry Cycle): ")
+    state PROGRAM_SELECT : print(f"Starting program {self.program}")
     state WASHING : print("Washing..")
     state RINSING : print("Rinsing..")
     state SPINNING : print("Spinning..")

@@ -26,10 +26,9 @@ class Program:
         with open(args.input_file, "r") as file:
             try:
                 parse_tree = self.parser.parse_puml(file)
+                LOGGER.debug(f"Generated parse tree:\n{parse_tree}")
             except frontend.ParseError as e:
                 LOGGER.exception(e)
-
-        LOGGER.debug(f"Generated parse tree:\n{parse_tree}")
 
 
 if __name__ == "__main__":
