@@ -1,9 +1,11 @@
+import gen_statemachine
 from re import S
 from typing import TextIO, List, Callable, NewType, Optional
 from dataclasses import dataclass, field
 
 from .lexer import LOGGER, Lexer
 from gen_statemachine.frontend.tokens import Token, TokenType
+from gen_statemachine.error import ProgramError
 
 
 @dataclass
@@ -39,24 +41,11 @@ class ParseTree:
         return self.root_node.to_str()
 
 
-@dataclass
-class ParseError(RuntimeError):
-    error_message: str
-    file_name: Optional[str] = None
-    line_no: int = 0
-    column_no: int = 0
-
-    def __str__(self):
-        return f"""
-        =======================================
-        ʘ︵ʘ oh no!!!
-        Parse error @ [{self.file_name}:{self.line_no}:{self.column_no}]
-          {self.error_message}
-        =======================================
-        """
-
-    def __repr__(self) -> str:
-        return self.__str__()
+class ParseError(ProgramError):
+    def __init__(self, detail: str, file_name: str, line_no: int, column_no: int):
+        super().__init__(
+            f"Parse error @ [{file_name}:{line_no}:{column_no}]" + "\n" + detail
+        )
 
 
 class Parser:
@@ -82,8 +71,7 @@ class Parser:
         next_token = self.lexer.look_for_tokens(tokens_to_find, tokens_to_skip)
 
         if next_token.type not in tokens_to_find:
-            error_msg = """Unexpected symbols -> '{}'
-             Expected one of -> {}""".format(
+            error_msg = """Unexpected symbols '{}'\nExpected one of {}""".format(
                 next_token.text[: next_token.text.find("\n")],
                 [str(t) for t in tokens_to_find],
             )
