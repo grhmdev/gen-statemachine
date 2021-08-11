@@ -84,7 +84,7 @@ class StateBuilder:
         self.add_description()
         self.add_regions()
 
-        if self.state.regions:
+        if len(self.state.regions) > 0:
             self.state.type = StateType.COMPOSITE
         else:
             self.state.type = StateType.SIMPLE
@@ -116,8 +116,14 @@ class StateBuilder:
 class TransitionBuilder:
     """Creates `Transition` objects from transition_declaration expressions"""
 
-    def __init__(self, statemachine: StateMachine, transition_decl_node: ParseTreeNode):
+    def __init__(
+        self,
+        statemachine: StateMachine,
+        region: Region,
+        transition_decl_node: ParseTreeNode,
+    ):
         self.statemachine = statemachine
+        self.region = region
         self.model_vertices = list(self.statemachine.vertices().values())
         self.transition_decl_node = transition_decl_node
         self.transition_label_node = next(
@@ -138,6 +144,9 @@ class TransitionBuilder:
             self.add_event()
             self.add_guard()
             self.add_action()
+
+        self.transition.type = TransitionType.INTERNAL
+
         return self.transition
 
     def add_stereotype(self):
@@ -156,6 +165,7 @@ class TransitionBuilder:
         target_token = vertex_tokens[1]
 
         if source_token.type is TokenType.NAME:
+            # Find source vertex by name
             source_name = source_token.text
             source_vertex = next(
                 filter(lambda e: e.name == source_name, self.model_vertices)
@@ -163,10 +173,12 @@ class TransitionBuilder:
             self.transition.source = source_vertex
             source_vertex.outgoing_transitions.append(self.transition)
         else:
-            # TODO [*]
-            pass
+            # [*] used as a transition source is an initial psuedo-state
+            self.transition.source = self.region.initial_state
+            self.region.initial_state.outgoing_transitions.append(self.transition)
 
         if target_token.type is TokenType.NAME:
+            # Find target vertex by name
             target_name = target_token.text
             target_vertex = next(
                 filter(lambda e: e.name == target_name, self.model_vertices)
@@ -174,8 +186,9 @@ class TransitionBuilder:
             self.transition.target = target_vertex
             target_vertex.incoming_transitions.append(self.transition)
         else:
-            # TODO [*]
-            pass
+            # [*] used as a transition target is a terminal psuedo-state
+            self.transition.target = self.region.terminal_state
+            self.region.terminal_state.outgoing_transitions.append(self.transition)
 
     def add_event(self):
         if event_token := find_first_token(
@@ -208,6 +221,8 @@ class RegionBuilder:
 
     def build(self) -> Region:
         self.region = self.statemachine.new_region()
+        self.region.initial_state = self.statemachine.new_initial_state()
+        self.region.terminal_state = self.statemachine.new_terminal_state()
         LOGGER.debug(f"Adding {self.region.id}")
 
         for node in self.declarations_node.children:
@@ -256,7 +271,7 @@ class RegionBuilder:
         self.region.choices.append(choice)
 
     def add_transition(self, node: ParseTreeNode):
-        transition = TransitionBuilder(self.statemachine, node).build()
+        transition = TransitionBuilder(self.statemachine, self.region, node).build()
         self.region.transitions.append(transition)
 
 

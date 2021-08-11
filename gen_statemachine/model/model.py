@@ -85,17 +85,19 @@ class Choice(PseudoState):
 
 
 @dataclass
-class InitialState(State):
+class InitialState(PseudoState):
     pass
 
 
 @dataclass
-class FinalState(State):
+class TerminalState(PseudoState):
     pass
 
 
 @dataclass
 class Region(Entity):
+    initial_state: Optional[InitialState] = None
+    terminal_state: Optional[TerminalState] = None
     states: List[State] = field(default_factory=list)
     transitions: List[Transition] = field(default_factory=list)
     choices: List[Choice] = field(default_factory=list)
@@ -160,8 +162,8 @@ class StateMachine(Entity):
     def new_initial_state(self) -> InitialState:
         return cast(InitialState, self._new_entity(InitialState))
 
-    def new_final_state(self) -> FinalState:
-        return cast(FinalState, self._new_entity(FinalState))
+    def new_terminal_state(self) -> TerminalState:
+        return cast(TerminalState, self._new_entity(TerminalState))
 
     def new_region(self) -> Region:
         return cast(Region, self._new_entity(Region))
@@ -193,7 +195,7 @@ AnyEntity = Union[
     State,
     Choice,
     InitialState,
-    FinalState,
+    TerminalState,
     Region,
     StateMachine,
 ]

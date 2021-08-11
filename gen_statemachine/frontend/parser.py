@@ -8,7 +8,7 @@ from gen_statemachine.frontend.tokens import Token, TokenType
 
 @dataclass
 class Node:
-    token: Optional[Token] = None
+    token: Token
     children: List["Node"] = field(default_factory=list)
     parent: Optional["Node"] = None
 
