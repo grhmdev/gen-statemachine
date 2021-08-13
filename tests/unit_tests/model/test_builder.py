@@ -11,19 +11,19 @@ class TestModelBuilder(TestCaseBase):
         """Test a parse tree with a simple state declaration"""
         # Construct tree
         parse_tree = ParseTree()
-        declarations_node = parse_tree.root_node.make_child(
+        declarations_node = parse_tree.root_node.add_child(
             Token(TokenType.declarations)
         )
-        state_declaration_node = declarations_node.make_child(
+        state_declaration_node = declarations_node.add_child(
             Token(TokenType.state_declaration)
         )
-        state_declaration_node.make_child(Token(TokenType.KEYWORD_STATE))
-        state_declaration_node.make_child(Token(TokenType.NAME, 0, 0, "STATE"))
-        state_declaration_node.make_child(
+        state_declaration_node.add_child(Token(TokenType.KEYWORD_STATE))
+        state_declaration_node.add_child(Token(TokenType.NAME, 0, 0, "STATE"))
+        state_declaration_node.add_child(
             Token(TokenType.STEREOTYPE_ANY, 0, 0, "<<stereotype text>>")
         )
-        state_declaration_node.make_child(Token(TokenType.COLON))
-        state_declaration_node.make_child(
+        state_declaration_node.add_child(Token(TokenType.COLON))
+        state_declaration_node.add_child(
             Token(TokenType.LABEL, 0, 0, "descriptive text")
         )
 
@@ -42,25 +42,25 @@ class TestModelBuilder(TestCaseBase):
         """Test a parse tree with a composite state declaration"""
         # Construct tree
         parse_tree = ParseTree()
-        declarations_node = parse_tree.root_node.make_child(
+        declarations_node = parse_tree.root_node.add_child(
             Token(TokenType.declarations)
         )
-        state_declaration_node = declarations_node.make_child(
+        state_declaration_node = declarations_node.add_child(
             Token(TokenType.state_declaration)
         )
-        state_declaration_node.make_child(Token(TokenType.KEYWORD_STATE))
-        state_declaration_node.make_child(Token(TokenType.NAME, 0, 0, "STATE1"))
-        state_declaration_node.make_child(Token(TokenType.OPEN_CURLY_BRACKET))
-        nested_declarations_node = state_declaration_node.make_child(
+        state_declaration_node.add_child(Token(TokenType.KEYWORD_STATE))
+        state_declaration_node.add_child(Token(TokenType.NAME, 0, 0, "STATE1"))
+        state_declaration_node.add_child(Token(TokenType.OPEN_CURLY_BRACKET))
+        nested_declarations_node = state_declaration_node.add_child(
             Token(TokenType.declarations)
         )
-        nested_state_declaration_node = nested_declarations_node.make_child(
+        nested_state_declaration_node = nested_declarations_node.add_child(
             Token(TokenType.state_declaration)
         )
-        state_declaration_node.make_child(Token(TokenType.CLOSE_CURLY_BRACKET))
+        state_declaration_node.add_child(Token(TokenType.CLOSE_CURLY_BRACKET))
 
-        nested_state_declaration_node.make_child(Token(TokenType.KEYWORD_STATE))
-        nested_state_declaration_node.make_child(Token(TokenType.NAME, 0, 0, "STATE2"))
+        nested_state_declaration_node.add_child(Token(TokenType.KEYWORD_STATE))
+        nested_state_declaration_node.add_child(Token(TokenType.NAME, 0, 0, "STATE2"))
 
         # Generate statemachine
         statemachine = ModelBuilder().build(parse_tree)
@@ -83,39 +83,39 @@ class TestModelBuilder(TestCaseBase):
         """Test a parse tree with a transition with an event, guard and action"""
         # Construct tree
         parse_tree = ParseTree()
-        declarations_node = parse_tree.root_node.make_child(
+        declarations_node = parse_tree.root_node.add_child(
             Token(TokenType.declarations)
         )
-        state1_declaration = declarations_node.make_child(
+        state1_declaration = declarations_node.add_child(
             Token(TokenType.state_declaration)
         )
-        state1_declaration.make_child(Token(TokenType.KEYWORD_STATE))
-        state1_declaration.make_child(Token(TokenType.NAME, 0, 0, "STATE1"))
+        state1_declaration.add_child(Token(TokenType.KEYWORD_STATE))
+        state1_declaration.add_child(Token(TokenType.NAME, 0, 0, "STATE1"))
 
-        state2_declaration = declarations_node.make_child(
+        state2_declaration = declarations_node.add_child(
             Token(TokenType.state_declaration)
         )
-        state2_declaration.make_child(Token(TokenType.KEYWORD_STATE))
-        state2_declaration.make_child(Token(TokenType.NAME, 0, 0, "STATE2"))
+        state2_declaration.add_child(Token(TokenType.KEYWORD_STATE))
+        state2_declaration.add_child(Token(TokenType.NAME, 0, 0, "STATE2"))
 
-        transition1_declaration = declarations_node.make_child(
+        transition1_declaration = declarations_node.add_child(
             Token(TokenType.transition_declaration)
         )
-        transition1_declaration.make_child(Token(TokenType.NAME, 0, 0, "STATE1"))
-        transition1_declaration.make_child(Token(TokenType.ARROW))
-        transition1_declaration.make_child(Token(TokenType.NAME, 0, 0, "STATE2"))
-        transition1_declaration.make_child(
+        transition1_declaration.add_child(Token(TokenType.NAME, 0, 0, "STATE1"))
+        transition1_declaration.add_child(Token(TokenType.ARROW))
+        transition1_declaration.add_child(Token(TokenType.NAME, 0, 0, "STATE2"))
+        transition1_declaration.add_child(
             Token(TokenType.STEREOTYPE_ANY, 0, 0, "<<stereotype>>")
         )
-        transition1_declaration.make_child(Token(TokenType.COLON))
-        transition1_label = transition1_declaration.make_child(
+        transition1_declaration.add_child(Token(TokenType.COLON))
+        transition1_label = transition1_declaration.add_child(
             Token(TokenType.transition_label)
         )
-        transition1_label.make_child(Token(TokenType.TRIGGER, 0, 0, "evDoSomething"))
-        transition1_label.make_child(Token(TokenType.OPEN_SQ_BRACKET))
-        transition1_label.make_child(Token(TokenType.GUARD, 0, 0, "Hulk > Thor"))
-        transition1_label.make_child(Token(TokenType.CLOSE_SQ_BRACKET))
-        transition1_label.make_child(Token(TokenType.BEHAVIOR, 0, 0, "do_something();"))
+        transition1_label.add_child(Token(TokenType.TRIGGER, 0, 0, "evDoSomething"))
+        transition1_label.add_child(Token(TokenType.OPEN_SQ_BRACKET))
+        transition1_label.add_child(Token(TokenType.GUARD, 0, 0, "Hulk > Thor"))
+        transition1_label.add_child(Token(TokenType.CLOSE_SQ_BRACKET))
+        transition1_label.add_child(Token(TokenType.BEHAVIOR, 0, 0, "do_something();"))
 
         # Generate statemachine
         statemachine = ModelBuilder().build(parse_tree)
