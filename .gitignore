@@ -1,6 +1,7 @@
 .venv/
 .temp/
 _pycache_/
+output/
 
 *.png
 *.pyc
