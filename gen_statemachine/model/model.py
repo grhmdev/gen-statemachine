@@ -54,7 +54,7 @@ class Transition(Entity):
 
 @dataclass
 class Vertex(Entity):
-    container: Optional[Region] = None
+    region: Optional[Region] = None
     incoming_transitions: List[Transition] = field(default_factory=list)
     outgoing_transitions: List[Transition] = field(default_factory=list)
     stereotype: Optional[str] = None
@@ -71,7 +71,7 @@ class State(Vertex):
     type: StateType = StateType.INVALID
     entry_actions: List[Action] = field(default_factory=list)
     exit_actions: List[Action] = field(default_factory=list)
-    regions: List[Region] = field(default_factory=list)
+    sub_regions: List[Region] = field(default_factory=list)
 
 
 @dataclass
@@ -98,9 +98,9 @@ class TerminalState(PseudoState):
 class Region(Entity):
     initial_state: Optional[InitialState] = None
     terminal_state: Optional[TerminalState] = None
-    states: List[State] = field(default_factory=list)
+    state: Optional[State] = None
+    sub_vertices: List[Vertex] = field(default_factory=list)
     transitions: List[Transition] = field(default_factory=list)
-    choices: List[Choice] = field(default_factory=list)
 
     def is_empty(self) -> bool:
         """Does this region own any entities?"""

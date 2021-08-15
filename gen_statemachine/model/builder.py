@@ -84,7 +84,7 @@ class StateBuilder:
         self.add_description()
         self.add_regions()
 
-        if len(self.state.regions) > 0:
+        if len(self.state.sub_regions) > 0:
             self.state.type = StateType.COMPOSITE
         else:
             self.state.type = StateType.SIMPLE
@@ -110,7 +110,8 @@ class StateBuilder:
             None,
         ):
             sub_region = RegionBuilder(self.statemachine, declarations_node).build()
-            self.state.regions.append(sub_region)
+            sub_region.state = self.state
+            self.state.sub_regions.append(sub_region)
 
 
 class TransitionBuilder:
@@ -262,13 +263,13 @@ class RegionBuilder:
 
     def add_state(self, node: ParseTreeNode):
         state = StateBuilder(self.statemachine, node).build()
-        state.container = self.region
-        self.region.states.append(state)
+        state.region = self.region
+        self.region.sub_vertices.append(state)
 
     def add_choice(self, node: ParseTreeNode):
         choice = ChoiceBuilder(self.statemachine, node).build()
-        choice.container = self.region
-        self.region.choices.append(choice)
+        choice.region = self.region
+        self.region.sub_vertices.append(choice)
 
     def add_transition(self, node: ParseTreeNode):
         transition = TransitionBuilder(self.statemachine, self.region, node).build()

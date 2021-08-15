@@ -36,7 +36,7 @@ class TestModelBuilder(TestCaseBase):
         self.assertEqual(state1.stereotype, "stereotype text")
         self.assertEqual(state1.description, "descriptive text")
         self.assertEqual(state1.type, StateType.SIMPLE)
-        self.assertTrue(state1 is statemachine.region.states[0])
+        self.assertTrue(state1 is statemachine.region.sub_vertices[0])
 
     def test_composite_state_declaration(self):
         """Test a parse tree with a composite state declaration"""
@@ -69,15 +69,17 @@ class TestModelBuilder(TestCaseBase):
         state1 = statemachine.entities["statemachine.state1"]
         self.assertEqual(state1.name, "STATE1")
         self.assertEqual(state1.type, StateType.COMPOSITE)
-        self.assertTrue(state1 is statemachine.region.states[0])
+        self.assertTrue(state1 is statemachine.region.sub_vertices[0])
 
         region2 = statemachine.entities["statemachine.region2"]
-        self.assertTrue(region2 is state1.regions[0])
+        self.assertTrue(region2 is state1.sub_regions[0])
+        self.assertEqual(region2.state, state1)
 
         state2 = statemachine.entities["statemachine.state2"]
         self.assertEqual(state2.name, "STATE2")
         self.assertEqual(state2.type, StateType.SIMPLE)
-        self.assertTrue(state2 is region2.states[0])
+        self.assertTrue(state2 is region2.sub_vertices[0])
+        self.assertEqual(state2.region, region2)
 
     def test_transition_within_region(self):
         """Test a parse tree with a transition with an event, guard and action"""
@@ -121,8 +123,8 @@ class TestModelBuilder(TestCaseBase):
         statemachine = ModelBuilder().build(parse_tree)
 
         # Assert
-        state1 = statemachine.region.states[0]
-        state2 = statemachine.region.states[1]
+        state1 = statemachine.region.sub_vertices[0]
+        state2 = statemachine.region.sub_vertices[1]
         transition1 = statemachine.region.transitions[0]
         self.assertEqual(transition1.source, state1)
         self.assertEqual(transition1.target, state2)
