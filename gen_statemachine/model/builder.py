@@ -40,6 +40,12 @@ def trim_stereotype_text(stereotype_text: str) -> str:
     return stereotype_text.strip("<>")
 
 
+def lookup_vertex(statemachine: StateMachine, decl_node: ParseTreeNode, region: Region):
+    """For a vertex declaration (e.g. state, choice), looks for an existing entity for that vertex in the same statemachine region """
+    state_name = extract_first_token(decl_node, TokenType.NAME).text
+    return next(filter(lambda v: v.name == state_name and v.region == region, statemachine.vertices().values()), None)
+
+
 class ChoiceBuilder:
     """Creates `ChoicePseudoState` objects from state_declaration expressions"""
 
@@ -71,13 +77,19 @@ class ChoiceBuilder:
 class StateBuilder:
     """Creates `State` objects from state_declaration and state_alias_declaration expressions"""
 
-    def __init__(self, statemachine: StateMachine, state_decl_node: ParseTreeNode):
+    def __init__(self, statemachine: StateMachine, region: Region, state_decl_node: ParseTreeNode):
         self.statemachine = statemachine
+        self.region = region
         self.state_decl_node = state_decl_node
 
     def build(self) -> State:
-        self.state = self.statemachine.new_state()
-        LOGGER.debug(f"Adding {self.state.id}")
+        self.state = lookup_vertex(self.statemachine, self.state_decl_node, self.region)
+
+        if not self.state:
+            self.state = self.statemachine.new_state()
+            LOGGER.debug(f"Adding {self.state.id}")
+        else:
+            LOGGER.debug(f"Updating {self.state.id}")
 
         self.state.name = extract_first_token(self.state_decl_node, TokenType.NAME).text
         self.add_stereotype()
@@ -262,7 +274,7 @@ class RegionBuilder:
         return self.region
 
     def add_state(self, node: ParseTreeNode):
-        state = StateBuilder(self.statemachine, node).build()
+        state = StateBuilder(self.statemachine, self.region, node).build()
         state.region = self.region
         self.region.sub_vertices.append(state)
 

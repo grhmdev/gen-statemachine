@@ -38,6 +38,30 @@ class TestModelBuilder(TestCaseBase):
         self.assertEqual(state1.type, StateType.SIMPLE)
         self.assertTrue(state1 is statemachine.region.sub_vertices[0])
 
+    def test_repeated_state_declarations(self):
+        """Test a parse tree with a 2 declarations for the same state"""
+        # Construct tree
+        parse_tree = ParseTree()
+        declarations_node = parse_tree.root_node.add_child(
+            Token(TokenType.declarations)
+        )
+        state_decl1_node = declarations_node.add_child(
+            Token(TokenType.state_declaration)
+        )
+        state_decl1_node.add_child(Token(TokenType.KEYWORD_STATE))
+        state_decl1_node.add_child(Token(TokenType.NAME, 0, 0, "STATE1"))
+        state_decl2_node = declarations_node.add_child(
+            Token(TokenType.state_declaration)
+        )
+        state_decl2_node.add_child(Token(TokenType.KEYWORD_STATE))
+        state_decl2_node.add_child(Token(TokenType.NAME, 0, 0, "STATE1"))
+
+        # Generate statemachine
+        statemachine = ModelBuilder().build(parse_tree)
+
+        # Assert
+        self.assertEqual(len(statemachine.states().values()), 1)
+
     def test_composite_state_declaration(self):
         """Test a parse tree with a composite state declaration"""
         # Construct tree
