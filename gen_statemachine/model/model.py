@@ -102,10 +102,6 @@ class Region(Entity):
     sub_vertices: List[Vertex] = field(default_factory=list)
     transitions: List[Transition] = field(default_factory=list)
 
-    def is_empty(self) -> bool:
-        """Does this region own any entities?"""
-        return not (self.states or self.transitions or self.choices)
-
 
 @dataclass
 class Metadata:
@@ -147,6 +143,9 @@ class StateMachine(Entity):
 
     def choices(self) -> Dict[Id, Choice]:
         return cast(Dict[Id, Choice], self._filter_entities(Choice))
+
+    def events(self) -> Dict[Id, Event]:
+        return cast(Dict[Id, Event], self._filter_entities(Event))
 
     def vertices(self) -> Dict[Id, Vertex]:
         return cast(

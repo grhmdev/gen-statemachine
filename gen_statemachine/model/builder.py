@@ -41,9 +41,15 @@ def trim_stereotype_text(stereotype_text: str) -> str:
 
 
 def lookup_vertex(statemachine: StateMachine, decl_node: ParseTreeNode, region: Region):
-    """For a vertex declaration (e.g. state, choice), looks for an existing entity for that vertex in the same statemachine region """
+    """For a vertex declaration (e.g. state, choice), looks for an existing entity for that vertex in the same statemachine region"""
     state_name = extract_first_token(decl_node, TokenType.NAME).text
-    return next(filter(lambda v: v.name == state_name and v.region == region, statemachine.vertices().values()), None)
+    return next(
+        filter(
+            lambda v: v.name == state_name and v.region == region,
+            statemachine.vertices().values(),
+        ),
+        None,
+    )
 
 
 class ChoiceBuilder:
@@ -75,14 +81,22 @@ class ChoiceBuilder:
 
 
 class StateBuilder:
-    """Creates `State` objects from state_declaration and state_alias_declaration expressions"""
+    """
+    Creates `State` objects from state_declaration and state_alias_declaration expressions.
+    It is possible that a state is 'declared' multiple times, but with each declaration providing
+    new information. It is important to not re-create the state and sub regions on subsequent
+    declarations.
+    """
 
-    def __init__(self, statemachine: StateMachine, region: Region, state_decl_node: ParseTreeNode):
+    def __init__(
+        self, statemachine: StateMachine, region: Region, state_decl_node: ParseTreeNode
+    ):
         self.statemachine = statemachine
         self.region = region
         self.state_decl_node = state_decl_node
 
     def build(self) -> State:
+        # Check if a state with the same name exists in this region before creating a new one
         self.state = lookup_vertex(self.statemachine, self.state_decl_node, self.region)
 
         if not self.state:
@@ -93,7 +107,7 @@ class StateBuilder:
 
         self.state.name = extract_first_token(self.state_decl_node, TokenType.NAME).text
         self.add_stereotype()
-        self.add_description()
+        self.add_action()
         self.add_regions()
 
         if len(self.state.sub_regions) > 0:
@@ -109,9 +123,18 @@ class StateBuilder:
         ):
             self.state.stereotype = trim_stereotype_text(stereotype_token.text)
 
-    def add_description(self):
-        if label_tokens := find_all_tokens(self.state_decl_node, [TokenType.LABEL]):
-            self.state.description = label_tokens[-1].text
+    def add_action(self):
+        if action_token := find_first_token(self.state_decl_node, [TokenType.BEHAVIOR]):
+            action = self.statemachine.new_action()
+            action.text = action_token.text
+            if action.text.startswith("exit/") or action.text.startswith("exit /"):
+                action.text = action.text[action.text.index("/") + 1 :].strip()
+                self.state.exit_actions.append(action)
+            elif action.text.startswith("entry/") or action.text.startswith("entry /"):
+                action.text = action.text[action.text.index("/") + 1 :].strip()
+                self.state.entry_actions.append(action)
+            else:
+                self.state.entry_actions.append(action)
 
     def add_regions(self):
         if declarations_node := next(
@@ -121,9 +144,13 @@ class StateBuilder:
             ),
             None,
         ):
-            sub_region = RegionBuilder(self.statemachine, declarations_node).build()
-            sub_region.state = self.state
-            self.state.sub_regions.append(sub_region)
+            builder = RegionBuilder(self.statemachine, declarations_node)
+            if self.state.sub_regions:
+                builder.update(self.state.sub_regions[0])
+            else:
+                sub_region = builder.build()
+                sub_region.state = self.state
+                self.state.sub_regions.append(sub_region)
 
 
 class TransitionBuilder:
@@ -201,7 +228,7 @@ class TransitionBuilder:
         else:
             # [*] used as a transition target is a terminal psuedo-state
             self.transition.target = self.region.terminal_state
-            self.region.terminal_state.outgoing_transitions.append(self.transition)
+            self.region.terminal_state.incoming_transitions.append(self.transition)
 
     def add_event(self):
         if event_token := find_first_token(
@@ -221,7 +248,7 @@ class TransitionBuilder:
         if action_token := find_first_token(
             self.transition_label_node, [TokenType.BEHAVIOR]
         ):
-            self.transition.action = self.statemachine.new_event()
+            self.transition.action = self.statemachine.new_action()
             self.transition.action.text = action_token.text
 
 
@@ -235,9 +262,14 @@ class RegionBuilder:
     def build(self) -> Region:
         self.region = self.statemachine.new_region()
         self.region.initial_state = self.statemachine.new_initial_state()
+        self.region.initial_state.region = self.region
         self.region.terminal_state = self.statemachine.new_terminal_state()
+        self.region.terminal_state.region = self.region
         LOGGER.debug(f"Adding {self.region.id}")
+        return self.update(self.region)
 
+    def update(self, existing_region: Region) -> Region:
+        self.region = existing_region
         for node in self.declarations_node.children:
             if not node.token:
                 raise RuntimeError(f"Node found without token")
