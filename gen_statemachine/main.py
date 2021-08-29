@@ -40,7 +40,7 @@ class Program:
         try:
             codegen_plugin = importlib.import_module(args.plugin)
             LOGGER.info(f"Found codegen module: {args.plugin}")
-            codegen_plugin 
+            codegen_plugin
         except ModuleNotFoundError as e:
             LOGGER.error(f"Failed to import --plugin module: {args.plugin}")
             LOGGER.exception(e)
@@ -56,7 +56,9 @@ class Program:
                 statemachine_model = self.model_builder.build(parse_tree)
 
                 LOGGER.info("Invoking codegen module..")
-                codegen_plugin.generate_statemachine_code(statemachine_model, plugin_args)
+                codegen_plugin.generate_statemachine_code(
+                    statemachine_model, plugin_args
+                )
 
             except frontend.ParseError as e:
                 LOGGER.exception(e)

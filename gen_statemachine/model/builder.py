@@ -45,7 +45,7 @@ def lookup_vertex(statemachine: StateMachine, decl_node: ParseTreeNode, region: 
     state_name = extract_first_token(decl_node, TokenType.NAME).text
     return next(
         filter(
-            lambda v: v.name == state_name and v.region == region,
+            lambda v: v.name == state_name,
             statemachine.vertices().values(),
         ),
         None,
@@ -96,15 +96,12 @@ class StateBuilder:
         self.state_decl_node = state_decl_node
 
     def build(self) -> State:
-        # Check if a state with the same name exists in this region before creating a new one
-        self.state = lookup_vertex(self.statemachine, self.state_decl_node, self.region)
+        new_state = self.statemachine.new_state()
+        LOGGER.debug(f"Adding {new_state.id}")
+        return self.update(new_state)
 
-        if not self.state:
-            self.state = self.statemachine.new_state()
-            LOGGER.debug(f"Adding {self.state.id}")
-        else:
-            LOGGER.debug(f"Updating {self.state.id}")
-
+    def update(self, state: State) -> State:
+        self.state = state
         self.state.name = extract_first_token(self.state_decl_node, TokenType.NAME).text
         self.add_stereotype()
         self.add_action()
@@ -260,13 +257,13 @@ class RegionBuilder:
         self.declarations_node = declarations_node
 
     def build(self) -> Region:
-        self.region = self.statemachine.new_region()
-        self.region.initial_state = self.statemachine.new_initial_state()
-        self.region.initial_state.region = self.region
-        self.region.terminal_state = self.statemachine.new_terminal_state()
-        self.region.terminal_state.region = self.region
-        LOGGER.debug(f"Adding {self.region.id}")
-        return self.update(self.region)
+        new_region = self.statemachine.new_region()
+        LOGGER.debug(f"Adding {new_region.id}")
+        new_region.initial_state = self.statemachine.new_initial_state()
+        new_region.initial_state.region = new_region
+        new_region.terminal_state = self.statemachine.new_terminal_state()
+        new_region.terminal_state.region = new_region
+        return self.update(new_region)
 
     def update(self, existing_region: Region) -> Region:
         self.region = existing_region
@@ -306,9 +303,13 @@ class RegionBuilder:
         return self.region
 
     def add_state(self, node: ParseTreeNode):
-        state = StateBuilder(self.statemachine, self.region, node).build()
-        state.region = self.region
-        self.region.sub_vertices.append(state)
+        builder = StateBuilder(self.statemachine, self.region, node)
+        if state := lookup_vertex(self.statemachine, node, self.region):
+            builder.update(state)
+        else:
+            state = builder.build()
+            state.region = self.region
+            self.region.sub_vertices.append(state)
 
     def add_choice(self, node: ParseTreeNode):
         choice = ChoiceBuilder(self.statemachine, node).build()
