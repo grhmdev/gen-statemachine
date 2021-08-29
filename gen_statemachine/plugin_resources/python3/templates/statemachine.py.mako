@@ -49,7 +49,7 @@ def transitions_by_source():
 def vertex_outgoing_transitions_by_event(vertex):
     transitions = {}
     for transition in vertex.outgoing_transitions:
-        key = transition.event.name if transition.event else _null_event_name
+        key = transition.trigger.name if transition.trigger else _null_event_name
         if key not in transitions:
             transitions[key] = []
         transitions[key].append(transition)
@@ -95,6 +95,21 @@ def entered_states(transition):
                 ${transition.action.text}
 % endif
 </%def>\
+<%def name="event_handler_for_vertex(vertex)">\
+<% if_elif = IfOrElif() %>\
+            % for event_name, transitions in vertex_outgoing_transitions_by_event(vertex).items():
+            ${next(if_elif)} event is Event.${event_name}:
+<% if_elif1 = IfOrElif() %>\
+                % for transition in transitions:
+                % if transition.guard:
+                ${next(if_elif)} ${transition.guard}:
+                    self._transition_to(State.${enum_name(transition.target)})
+                % else:
+                self._transition_to(State.${enum_name(transition.target)})
+                % endif
+                % endfor
+            % endfor
+</%def>\
 from enum import Enum
 from queue import SimpleQueue
 
@@ -132,6 +147,11 @@ class Statemachine:
             self._process_event(self._event_queue.get())
 
     def _process_event(self, event):
+<% if_elif = IfOrElif() %>\
+        % for vertex in vertices_with_outgoing_transitions():
+        ${next(if_elif)} self._current_state is State.${enum_name(vertex)}:
+${event_handler_for_vertex(vertex)}\
+        % endfor
         return
 
     def _push_transition(self, target_state):
