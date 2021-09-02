@@ -1,11 +1,8 @@
-from gen_statemachine import plugins
-import gen_statemachine
 import logging
 import argparse
 import importlib
-import frontend
-import model
-import gen_statemachine.plugins
+from gen_statemachine import frontend
+from gen_statemachine import model
 from pathlib import Path
 from sys import stdout
 from typing import Tuple, List
@@ -40,7 +37,6 @@ class Program:
         try:
             codegen_plugin = importlib.import_module(args.plugin)
             LOGGER.info(f"Found codegen module: {args.plugin}")
-            codegen_plugin
         except ModuleNotFoundError as e:
             LOGGER.error(f"Failed to import --plugin module: {args.plugin}")
             LOGGER.exception(e)

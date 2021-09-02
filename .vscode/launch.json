@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/gen_statemachine/main.py",
-            "args": ["${workspaceFolder}/examples/test_nested_entry_exit.puml"],
+            "args": ["${workspaceFolder}/examples/washing_machine.puml"],
             "console": "integratedTerminal"
         },
         {
