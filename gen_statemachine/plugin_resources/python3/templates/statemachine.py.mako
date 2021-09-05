@@ -37,6 +37,9 @@ def states_with_exit_actions():
 def vertices_with_outgoing_transitions():
     return [vertex for vertex in statemachine.vertices().values() if vertex.outgoing_transitions]
 
+def terminal_states_in_sub_regions():
+    return [terminal_state for terminal_state in statemachine.terminal_states().values() if terminal_state.region.state]
+
 def transitions_by_source():
     transitions = {}
     for transition in statemachine.transitions().values():
@@ -82,12 +85,12 @@ def entered_states(transition):
 %>\
 <%def name="exit_superstates(transition)">\
 % for exited_state in exited_states(transition):
-                self._exit_state(State.${exited_state.name})
+                self._exit_state(State.${enum_name(exited_state)})
 % endfor
 </%def>\
 <%def name="enter_superstates(transition)">\
 % for entered_state in entered_states(transition):
-                self._enter_state(State.${entered_state.name})
+                self._enter_state(State.${enum_name(entered_state)})
 % endfor
 </%def>\
 <%def name="transition_action(transition)">\
@@ -102,13 +105,19 @@ def entered_states(transition):
 <% if_elif1 = IfOrElif() %>\
                 % for transition in transitions:
                 % if transition.guard:
-                ${next(if_elif)} ${transition.guard}:
+                ${next(if_elif1)} ${transition.guard.condition}:
                     self._transition_to(State.${enum_name(transition.target)})
                 % else:
                 self._transition_to(State.${enum_name(transition.target)})
                 % endif
                 % endfor
             % endfor
+</%def>\
+<%def name="enter_substates(vertex)">\
+% if type(vertex) is gen_statemachine.model.State and vertex.sub_regions:
+                self._enter_state(State.${enum_name(vertex.sub_regions[0].initial_state)})
+${enter_substates(vertex.sub_regions[0].initial_state)}\
+% endif
 </%def>\
 from enum import Enum
 from queue import SimpleQueue
@@ -152,6 +161,12 @@ class Statemachine:
         ${next(if_elif)} self._current_state is State.${enum_name(vertex)}:
 ${event_handler_for_vertex(vertex)}\
         % endfor
+        % for terminal_state in terminal_states_in_sub_regions():
+        ${next(if_elif)} self._current_state is State.${enum_name(terminal_state)}:
+            self._exit_state(State.${enum_name(terminal_state)})
+            self._current_state = State.${enum_name(terminal_state.region.state)}
+            self.queue_event(Event._null_event)
+        % endfor
         return
 
     def _push_transition(self, target_state):
@@ -168,8 +183,9 @@ ${event_handler_for_vertex(vertex)}\
 ${exit_superstates(transition)}\
 ${transition_action(transition)}\
 ${enter_superstates(transition)}\
+                self._enter_state(State.${enum_name(transition.target)})
+${enter_substates(transition.target)}\
             % endfor
-                self._enter_state(target_state)
         % endfor
         self.queue_event(Event._null_event)
 

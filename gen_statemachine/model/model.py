@@ -155,6 +155,9 @@ class StateMachine(Entity):
     def transitions(self) -> Dict[Id, Transition]:
         return cast(Dict[Id, Transition], self._filter_entities(Transition))
 
+    def terminal_states(self) -> Dict[Id, TerminalState]:
+        return cast(Dict[Id, TerminalState], self._filter_entities(TerminalState))
+
     def new_state(self) -> State:
         return cast(State, self._new_entity(State))
 
