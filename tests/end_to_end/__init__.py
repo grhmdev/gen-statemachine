@@ -15,7 +15,7 @@ class EndToEndTestCase(TestCaseBase):
 
         self.output_dir = Path(__file__).parent.absolute() / "output" / test_name
         shutil.rmtree(self.output_dir, ignore_errors=True)
-        self.output_dir.mkdir()
+        self.output_dir.mkdir(parents=True)
 
         self.log_file = self.output_dir / "test.log"
         logging.basicConfig(filename=self.log_file, filemode="w", level=logging.DEBUG)
