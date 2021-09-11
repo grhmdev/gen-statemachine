@@ -13,3 +13,4 @@ lint:
 
 diagrams:
 	plantuml examples/*.puml
+	plantuml tests/**/*.puml

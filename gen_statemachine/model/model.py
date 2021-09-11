@@ -54,7 +54,7 @@ class Transition(Entity):
 
 @dataclass
 class Vertex(Entity):
-    container: Optional[Region] = None
+    region: Optional[Region] = None
     incoming_transitions: List[Transition] = field(default_factory=list)
     outgoing_transitions: List[Transition] = field(default_factory=list)
     stereotype: Optional[str] = None
@@ -71,7 +71,7 @@ class State(Vertex):
     type: StateType = StateType.INVALID
     entry_actions: List[Action] = field(default_factory=list)
     exit_actions: List[Action] = field(default_factory=list)
-    regions: List[Region] = field(default_factory=list)
+    sub_regions: List[Region] = field(default_factory=list)
 
 
 @dataclass
@@ -98,13 +98,9 @@ class TerminalState(PseudoState):
 class Region(Entity):
     initial_state: Optional[InitialState] = None
     terminal_state: Optional[TerminalState] = None
-    states: List[State] = field(default_factory=list)
+    state: Optional[State] = None
+    sub_vertices: List[Vertex] = field(default_factory=list)
     transitions: List[Transition] = field(default_factory=list)
-    choices: List[Choice] = field(default_factory=list)
-
-    def is_empty(self) -> bool:
-        """Does this region own any entities?"""
-        return not (self.states or self.transitions or self.choices)
 
 
 @dataclass
@@ -148,6 +144,9 @@ class StateMachine(Entity):
     def choices(self) -> Dict[Id, Choice]:
         return cast(Dict[Id, Choice], self._filter_entities(Choice))
 
+    def events(self) -> Dict[Id, Event]:
+        return cast(Dict[Id, Event], self._filter_entities(Event))
+
     def vertices(self) -> Dict[Id, Vertex]:
         return cast(
             Dict[Id, Vertex], self._filter_entities(Vertex, include_subclasses=True)
@@ -155,6 +154,9 @@ class StateMachine(Entity):
 
     def transitions(self) -> Dict[Id, Transition]:
         return cast(Dict[Id, Transition], self._filter_entities(Transition))
+
+    def terminal_states(self) -> Dict[Id, TerminalState]:
+        return cast(Dict[Id, TerminalState], self._filter_entities(TerminalState))
 
     def new_state(self) -> State:
         return cast(State, self._new_entity(State))

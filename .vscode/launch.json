@@ -11,6 +11,14 @@
             "program": "${workspaceFolder}/gen_statemachine/main.py",
             "args": ["${workspaceFolder}/examples/washing_machine.puml"],
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python output.main",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/output/main.py",
+            "args": [],
+            "console": "integratedTerminal"
         }
     ]
 }
