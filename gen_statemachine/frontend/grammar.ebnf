@@ -7,15 +7,21 @@ declarations = {declaration NEWLINE}+
 
 declaration = state_declaration | state_alias_declaration | transition_declaration | anchored_note_declaration | floating_note_declaration | comment | state_label
 
-state_declaration = KEYWORD_STATE NAME [STEREOTYPE] [COLON BEHAVIOR] NEWLINE |
+entry_action = KEYWORD_ENTRY FORWARD_SLASH BEHAVIOR
+
+exit_action = KEYWORD_EXIT FORWARD_SLASH BEHAVIOR
+
+state_declaration = KEYWORD_STATE NAME [STEREOTYPE] [COLON (entry_action | exit_action | LABEL) ] NEWLINE |
                     KEYWORD_STATE NAME [STEREOTYPE] OPEN_CURLY_BRACKET NEWLINE declarations CLOSE_CURLY_BRACKET NEWLINE
 
-state_alias_declaration = KEYWORD_STATE QUOTATION LABEL QUOTATION KEYWORD_AS NAME [STEREOTYPE] [COLON BEHAVIOR] NEWLINE
+state_alias_declaration = KEYWORD_STATE QUOTATION LABEL QUOTATION KEYWORD_AS NAME [STEREOTYPE] [COLON (entry_action | exit_action | LABEL)] NEWLINE
 
-state_label = NAME COLON BEHAVIOR
+state_label = NAME COLON (entry_action | exit_action | LABEL)
 
 transition_declaration = (NAME | INITIAL_FINAL_STATE) ARROW (NAME | INITIAL_FINAL_STATE) [STEREOTYPE] NEWLINE |
                          (NAME | INITIAL_FINAL_STATE) ARROW (NAME | INITIAL_FINAL_STATE) [STEREOTYPE] COLON transition_label NEWLINE
+
+transition_label = [TRIGGER] [OPEN_SQ_BRACKET GUARD CLOSE_SQ_BRACKET] [FORWARD_SLASH BEHAVIOR]
 
 anchored_note_declaration = KEYWORD_NOTE (KEYWORD_LEFT_OF | KEYWORD_RIGHT_OF) NAME COLON LABEL NEWLINE |
                             KEYWORD_NOTE (KEYWORD_LEFT_OF | KEYWORD_RIGHT_OF) NAME NEWLINE {LABEL NEWLINE}+ KEYWORD_END_UML KEYWORD_NOTE NEWLINE
@@ -24,5 +30,3 @@ floating_note_declaration = KEYWORD_NOTE QUOTATION LABEL QUOTATION KEYWORD_AS NA
 
 comment = APOSTROPHE LABEL |
           START_BLOCK_COMMENT NEWLINE {LABEL NEWLINE}+ END_BLOCK_COMMENT
-
-transition_label = [TRIGGER] [OPEN_SQ_BRACKET GUARD CLOSE_SQ_BRACKET] [FORWARD_SLASH BEHAVIOR]

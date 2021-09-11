@@ -104,6 +104,7 @@ class StateBuilder:
         self.state = state
         self.state.name = extract_first_token(self.state_decl_node, TokenType.NAME).text
         self.add_stereotype()
+        self.add_label()
         self.add_action()
         self.add_regions()
 
@@ -120,18 +121,29 @@ class StateBuilder:
         ):
             self.state.stereotype = trim_stereotype_text(stereotype_token.text)
 
+    def add_label(self):
+        if label_token := find_first_token(self.state_decl_node, [TokenType.LABEL]):
+            self.state.description = label_token.text
+
     def add_action(self):
-        if action_token := find_first_token(self.state_decl_node, [TokenType.BEHAVIOR]):
-            action = self.statemachine.new_action()
-            action.text = action_token.text
-            if action.text.startswith("exit/") or action.text.startswith("exit /"):
-                action.text = action.text[action.text.index("/") + 1 :].strip()
-                self.state.exit_actions.append(action)
-            elif action.text.startswith("entry/") or action.text.startswith("entry /"):
-                action.text = action.text[action.text.index("/") + 1 :].strip()
-                self.state.entry_actions.append(action)
-            else:
-                self.state.entry_actions.append(action)
+        action = None
+        action_node = next(
+            filter(
+                lambda n: n.token.type
+                in [TokenType.entry_action, TokenType.exit_action],
+                self.state_decl_node.children,
+            ),
+            None,
+        )
+        if not action_node:
+            return
+        behavior_token = find_first_token(action_node, [TokenType.BEHAVIOR])
+        action = self.statemachine.new_action()
+        action.text = behavior_token.text
+        if action_node.token.type is TokenType.entry_action:
+            self.state.entry_actions.append(action)
+        else:
+            self.state.exit_actions.append(action)
 
     def add_regions(self):
         if declarations_node := next(

@@ -57,7 +57,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
         self.assertEqual(node.children[1].token.type, TokenType.NAME)
         self.assertEqual(node.children[1].token.text, "STATE1")
-        self.assertEqual(node.children[2].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(node.children[2].token.type, TokenType.LABEL)
         self.assertEqual(node.children[2].token.text, "hello world")
 
     def test_state_declaration_with_stereotype(self):
@@ -113,7 +113,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[1].token.text, "STATE1")
         self.assertEqual(node.children[2].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[2].token.text, "<<stereotype>>")
-        self.assertEqual(node.children[3].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(node.children[3].token.type, TokenType.LABEL)
         self.assertEqual(node.children[3].token.text, "hello world")
 
     def test_note_declaration_left_of(self):
@@ -355,7 +355,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[2].token.type, TokenType.KEYWORD_AS)
         self.assertEqual(node.children[3].token.type, TokenType.NAME)
         self.assertEqual(node.children[3].token.text, "STATE1")
-        self.assertEqual(node.children[4].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(node.children[4].token.type, TokenType.LABEL)
         self.assertEqual(node.children[4].token.text, "hello world")
 
     def test_state_alias_with_label_and_stereotype(self):
@@ -387,7 +387,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[3].token.text, "STATE1")
         self.assertEqual(node.children[4].token.type, TokenType.STEREOTYPE_ANY)
         self.assertEqual(node.children[4].token.text, "<<stereotype>>")
-        self.assertEqual(node.children[5].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(node.children[5].token.type, TokenType.LABEL)
         self.assertEqual(node.children[5].token.text, "hello world")
 
     def test_composite_state_alias_declaration(self):
@@ -448,7 +448,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(child_node.children[0].token.type, TokenType.NAME)
         self.assertEqual(child_node.children[0].token.text, "STATE2")
         self.assertEqual(child_node.children[1].token.type, TokenType.COLON)
-        self.assertEqual(child_node.children[2].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(child_node.children[2].token.type, TokenType.LABEL)
 
     def test_composite_state_declaration(self):
         file_path = self.create_file(
@@ -505,7 +505,7 @@ class TestParser(TestCaseBase):
         self.assertEqual(child_node.children[0].token.type, TokenType.NAME)
         self.assertEqual(child_node.children[0].token.text, "STATE2")
         self.assertEqual(child_node.children[1].token.type, TokenType.COLON)
-        self.assertEqual(child_node.children[2].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(child_node.children[2].token.type, TokenType.LABEL)
         self.assertEqual(child_node.children[2].token.text, "label")
 
     def test_state_transition_from_entry(self):
@@ -1205,3 +1205,177 @@ class TestParser(TestCaseBase):
         self.assertEqual(node.children[2].token.type, TokenType.LABEL)
         self.assertEqual(node.children[2].token.text, "world")
         self.assertEqual(node.children[3].token.type, TokenType.END_BLOCK_COMMENT)
+
+    def test_state_declaration_with_entry_action(self):
+        file_path = self.create_file(
+            contents=dedent(
+                """
+        @startuml
+
+        state STATE1 : entry  / doSomething();
+
+        @enduml
+        """
+            )
+        )
+        parser = Parser()
+
+        with open(file_path, "r") as file:
+            parse_tree = parser.parse_puml(file)
+
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
+        self.assertEqual(node.token.type, TokenType.state_declaration)
+        self.assertEqual(len(node.children), 3)
+        self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
+        self.assertEqual(node.children[1].token.type, TokenType.NAME)
+        self.assertEqual(node.children[1].token.text, "STATE1")
+        self.assertEqual(node.children[2].token.type, TokenType.entry_action)
+        action_node = node.children[2]
+        self.assertEqual(len(action_node.children), 3)
+        self.assertEqual(action_node.children[0].token.type, TokenType.KEYWORD_ENTRY)
+        self.assertEqual(action_node.children[2].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(action_node.children[2].token.text, "doSomething();")
+
+    def test_state_declaration_with_exit_action(self):
+        file_path = self.create_file(
+            contents=dedent(
+                """
+        @startuml
+
+        state STATE1 : exit/ doSomething();
+
+        @enduml
+        """
+            )
+        )
+        parser = Parser()
+
+        with open(file_path, "r") as file:
+            parse_tree = parser.parse_puml(file)
+
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
+        self.assertEqual(node.token.type, TokenType.state_declaration)
+        self.assertEqual(len(node.children), 3)
+        self.assertEqual(node.children[0].token.type, TokenType.KEYWORD_STATE)
+        self.assertEqual(node.children[1].token.type, TokenType.NAME)
+        self.assertEqual(node.children[1].token.text, "STATE1")
+        self.assertEqual(node.children[2].token.type, TokenType.exit_action)
+        action_node = node.children[2]
+        self.assertEqual(len(action_node.children), 3)
+        self.assertEqual(action_node.children[0].token.type, TokenType.KEYWORD_EXIT)
+        self.assertEqual(action_node.children[2].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(action_node.children[2].token.text, "doSomething();")
+
+    def test_state_alias_declaration_with_entry_action(self):
+        file_path = self.create_file(
+            contents=dedent(
+                """
+        @startuml
+
+        state "state 1" as STATE1 : entry  / doSomething();
+
+        @enduml
+        """
+            )
+        )
+        parser = Parser()
+
+        with open(file_path, "r") as file:
+            parse_tree = parser.parse_puml(file)
+
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
+        self.assertEqual(node.token.type, TokenType.state_alias_declaration)
+        self.assertEqual(len(node.children), 5)
+        self.assertEqual(node.children[4].token.type, TokenType.entry_action)
+        action_node = node.children[4]
+        self.assertEqual(len(action_node.children), 3)
+        self.assertEqual(action_node.children[0].token.type, TokenType.KEYWORD_ENTRY)
+        self.assertEqual(action_node.children[2].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(action_node.children[2].token.text, "doSomething();")
+
+    def test_state_alias_declaration_with_exit_action(self):
+        file_path = self.create_file(
+            contents=dedent(
+                """
+        @startuml
+
+        state "state 1" as STATE1 : exit  / doSomething();
+
+        @enduml
+        """
+            )
+        )
+        parser = Parser()
+
+        with open(file_path, "r") as file:
+            parse_tree = parser.parse_puml(file)
+
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
+        self.assertEqual(node.token.type, TokenType.state_alias_declaration)
+        self.assertEqual(len(node.children), 5)
+        self.assertEqual(node.children[4].token.type, TokenType.exit_action)
+        action_node = node.children[4]
+        self.assertEqual(len(action_node.children), 3)
+        self.assertEqual(action_node.children[0].token.type, TokenType.KEYWORD_EXIT)
+        self.assertEqual(action_node.children[2].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(action_node.children[2].token.text, "doSomething();")
+
+    def test_state_label_with_entry_action(self):
+        file_path = self.create_file(
+            contents=dedent(
+                """
+        @startuml
+
+        STATE1 : entry/ doSomething();
+
+        @enduml
+        """
+            )
+        )
+        parser = Parser()
+
+        with open(file_path, "r") as file:
+            parse_tree = parser.parse_puml(file)
+
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
+        self.assertEqual(node.token.type, TokenType.state_label)
+        self.assertEqual(len(node.children), 3)
+        self.assertEqual(node.children[2].token.type, TokenType.entry_action)
+        action_node = node.children[2]
+        self.assertEqual(len(action_node.children), 3)
+        self.assertEqual(action_node.children[0].token.type, TokenType.KEYWORD_ENTRY)
+        self.assertEqual(action_node.children[2].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(action_node.children[2].token.text, "doSomething();")
+
+    def test_state_label_with_exit_action(self):
+        file_path = self.create_file(
+            contents=dedent(
+                """
+        @startuml
+
+        STATE1 : exit   / doSomething();
+
+        @enduml
+        """
+            )
+        )
+        parser = Parser()
+
+        with open(file_path, "r") as file:
+            parse_tree = parser.parse_puml(file)
+
+        declarations_node = parse_tree.root_node.children[1]
+        node = declarations_node.children[0]
+        self.assertEqual(node.token.type, TokenType.state_label)
+        self.assertEqual(len(node.children), 3)
+        self.assertEqual(node.children[2].token.type, TokenType.exit_action)
+        action_node = node.children[2]
+        self.assertEqual(len(action_node.children), 3)
+        self.assertEqual(action_node.children[0].token.type, TokenType.KEYWORD_EXIT)
+        self.assertEqual(action_node.children[2].token.type, TokenType.BEHAVIOR)
+        self.assertEqual(action_node.children[2].token.text, "doSomething();")

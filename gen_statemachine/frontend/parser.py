@@ -190,7 +190,6 @@ class Parser:
         )
         state_node = parent_node.add_child(state_token)
 
-        # Add the 'state' token
         state_node.add_child(first_token)
 
         # Look for state name, or quotation enclosed label
@@ -272,12 +271,37 @@ class Parser:
                 state_node, terminal_token=TokenType.CLOSE_CURLY_BRACKET
             )
         elif next_token.type is TokenType.COLON:
-            # Look for label
+            # Look for entry/exit action or label
             next_token = self._find_tokens(
-                tokens_to_find=[TokenType.BEHAVIOR],
+                tokens_to_find=[
+                    TokenType.KEYWORD_ENTRY,
+                    TokenType.KEYWORD_EXIT,
+                    TokenType.LABEL,
+                ],
                 tokens_to_skip=[TokenType.WHITESPACE],
             )
-            state_node.add_child(next_token)
+            if next_token.type is TokenType.LABEL:
+                state_node.add_child(next_token)
+            else:
+                action_token = Token(
+                    type=TokenType.entry_action
+                    if next_token.type is TokenType.KEYWORD_ENTRY
+                    else TokenType.exit_action,
+                    start_line=next_token.start_line,
+                    start_col=next_token.start_col,
+                )
+                action_node = state_node.add_child(action_token)
+                action_node.add_child(next_token)
+                next_token = self._find_tokens(
+                    tokens_to_find=[TokenType.FORWARD_SLASH],
+                    tokens_to_skip=[TokenType.WHITESPACE],
+                )
+                action_node.add_child(next_token)
+                next_token = self._find_tokens(
+                    tokens_to_find=[TokenType.BEHAVIOR],
+                    tokens_to_skip=[TokenType.WHITESPACE],
+                )
+                action_node.add_child(next_token)
 
         LOGGER.debug("end of state_declaration")
 
@@ -486,12 +510,37 @@ class Parser:
         state_label_node.add_child(name_token)
         state_label_node.add_child(colon_token)
 
-        # Look for label
+        # Look for entry/exit action or label
         next_token = self._find_tokens(
-            tokens_to_find=[TokenType.BEHAVIOR],
+            tokens_to_find=[
+                TokenType.KEYWORD_ENTRY,
+                TokenType.KEYWORD_EXIT,
+                TokenType.LABEL,
+            ],
             tokens_to_skip=[TokenType.WHITESPACE],
         )
-        state_label_node.add_child(next_token)
+        if next_token.type is TokenType.LABEL:
+            state_label_node.add_child(next_token)
+        else:
+            action_token = Token(
+                type=TokenType.entry_action
+                if next_token.type is TokenType.KEYWORD_ENTRY
+                else TokenType.exit_action,
+                start_line=next_token.start_line,
+                start_col=next_token.start_col,
+            )
+            action_node = state_label_node.add_child(action_token)
+            action_node.add_child(next_token)
+            next_token = self._find_tokens(
+                tokens_to_find=[TokenType.FORWARD_SLASH],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+            action_node.add_child(next_token)
+            next_token = self._find_tokens(
+                tokens_to_find=[TokenType.BEHAVIOR],
+                tokens_to_skip=[TokenType.WHITESPACE],
+            )
+            action_node.add_child(next_token)
 
         LOGGER.debug("end of state_label")
 

@@ -26,6 +26,10 @@ class TokenType(Enum):
     KEYWORD_RIGHT_OF = auto()
     # end
     KEYWORD_END = auto()
+    # entry
+    KEYWORD_ENTRY = auto()
+    # exit
+    KEYWORD_EXIT = auto()
     # [*]
     INITIAL_FINAL_STATE = auto()
     # -->
@@ -82,6 +86,10 @@ class TokenType(Enum):
     # Production rules / "sentences"
     root = auto()
     declarations = auto()
+    # entry / do_something();
+    entry_action = auto()
+    # exit / do_something();
+    exit_action = auto()
     # state Disabled
     state_declaration = auto()
     # state "Powered On" as ON
@@ -110,6 +118,8 @@ patterns = {
     TokenType.KEYWORD_START_UML: r"^@startuml\Z",
     TokenType.KEYWORD_END_UML: r"^@enduml\Z",
     TokenType.KEYWORD_AS: r"^as\Z",
+    TokenType.KEYWORD_ENTRY: r"^entry\Z",
+    TokenType.KEYWORD_EXIT: r"^exit\Z",
     TokenType.INITIAL_FINAL_STATE: r"^\[\*\]\Z",
     TokenType.ARROW: r"^-(up|down|left|right)?(\[.*\])?->\Z",
     TokenType.NAME: r"^[a-zA-Z0-9_]+\Z",
