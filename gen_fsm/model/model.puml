@@ -19,7 +19,7 @@ class Entity {
     id: str
     description: Optional[str]
 }
-class StateMachine <<Entity>> {
+class Statemachine <<Entity>> {
 
 }
 class Region <<Entity>>
@@ -47,8 +47,8 @@ class Guard <<Entity>> {
 class Action <<Entity>> {
     text: str
 }
-' StateMachine relations
-StateMachine "1..*" *-right- "1" Region
+' Statemachine relations
+Statemachine "1..*" *-right- "1" Region
 
 ' Region relations
 Region "1" *-right- "0..*" Vertex

@@ -12,5 +12,6 @@ lint:
 	poetry run python -m mypy gen_fsm/ --ignore-missing-imports
 
 diagrams:
-	plantuml examples/*.puml
+	plantuml examples/**/*.puml
 	plantuml tests/**/*.puml
+	plantuml gen_fsm/**/*.puml
