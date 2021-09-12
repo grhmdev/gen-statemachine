@@ -34,7 +34,8 @@ STATE2 -up-> STATE3
 STATE4 -down-> STATE5
 STATE2 --> [*]
 
-/' Choice stereotype and conditional transitions '/
+/' Choice stereotype and 
+conditional transitions '/
 state STATE13 <<choice>> : this is a choice
 STATE13 --> STATE4 : [else]
 STATE13 --> STATE3 : [a > b] text here too

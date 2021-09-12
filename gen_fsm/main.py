@@ -1,8 +1,8 @@
 import logging
 import argparse
 import importlib
-from gen_statemachine import frontend
-from gen_statemachine import model
+from gen_fsm import frontend
+from gen_fsm import model
 from pathlib import Path
 from sys import stdout
 from typing import Tuple, List
@@ -27,7 +27,7 @@ class Program:
             dest="plugin",
             help="Python module to import for statemachine code generation",
             type=str,
-            default="gen_statemachine.plugins.default",
+            default="gen_fsm.plugins.default",
         )
         return parser.parse_known_args()
 

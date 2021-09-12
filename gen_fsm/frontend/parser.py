@@ -1,11 +1,11 @@
-import gen_statemachine
+import gen_fsm
 from re import S
 from typing import TextIO, List, Callable, NewType, Optional
 from dataclasses import dataclass, field
 
 from .lexer import LOGGER, Lexer
-from gen_statemachine.frontend.tokens import Token, TokenType
-from gen_statemachine.error import ProgramError
+from gen_fsm.frontend.tokens import Token, TokenType
+from gen_fsm.error import ProgramError
 
 
 @dataclass

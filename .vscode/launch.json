@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: gen_statemachine.main",
+            "name": "Python: gen_fsm.main",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/gen_statemachine/main.py",
+            "program": "${workspaceFolder}/gen_fsm/main.py",
             "args": ["${workspaceFolder}/examples/washing_machine.puml"],
             "console": "integratedTerminal"
         },

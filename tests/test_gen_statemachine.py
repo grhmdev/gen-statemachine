@@ -1,4 +1,4 @@
-from gen_statemachine import __version__
+from gen_fsm import __version__
 
 
 def test_version():

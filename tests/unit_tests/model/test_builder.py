@@ -1,9 +1,9 @@
 import unittest
 from tests.utilities import TestCaseBase
 
-from gen_statemachine.model.model import StateType
-from gen_statemachine.model import ModelBuilder
-from gen_statemachine.frontend import Token, TokenType, ParseTree
+from gen_fsm.model.model import StateType
+from gen_fsm.model import ModelBuilder
+from gen_fsm.frontend import Token, TokenType, ParseTree
 
 
 class TestModelBuilder(TestCaseBase):

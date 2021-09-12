@@ -1,9 +1,9 @@
-from gen_statemachine.frontend.tokens import Token, TokenType
+from gen_fsm.frontend.tokens import Token, TokenType
 from typing import List
 import unittest
 from tests.utilities import TestCaseBase
 
-from gen_statemachine.frontend.lexer import Lexer
+from gen_fsm.frontend.lexer import Lexer
 
 
 class TestLexer(TestCaseBase):

@@ -1,5 +1,5 @@
 from pathlib import Path
-import gen_statemachine.main
+import gen_fsm.main
 import shutil
 import importlib
 import sys
@@ -27,7 +27,7 @@ class EndToEndTestCase(TestCaseBase):
             __name__,
             str(self.input_file),
             "--plugin",
-            "gen_statemachine.plugins.default",
+            "gen_fsm.plugins.default",
             "--output",
             str(self.output_dir),
         ]
@@ -36,7 +36,7 @@ class EndToEndTestCase(TestCaseBase):
 
     def run_program(self):
         logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-        program = gen_statemachine.main.Program()
+        program = gen_fsm.main.Program()
         program.run()
 
     def import_statemachine_module(self):

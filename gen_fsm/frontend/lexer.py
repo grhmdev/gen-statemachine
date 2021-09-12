@@ -2,7 +2,7 @@ import logging
 import re
 from typing import Optional, TextIO, List, Tuple, Match
 
-from gen_statemachine.frontend.tokens import Token, TokenType, patterns
+from gen_fsm.frontend.tokens import Token, TokenType, patterns
 
 LOGGER = logging.getLogger(__name__)
 

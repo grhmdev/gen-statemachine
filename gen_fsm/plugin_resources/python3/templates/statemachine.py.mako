@@ -1,5 +1,5 @@
 <%
-import gen_statemachine
+import gen_fsm
 
 _null_event_name = "_null_event"
 _initial_state_name = "_initial_state"
@@ -21,9 +21,9 @@ def vertex_namespace(vertex):
     )
 
 def enum_name(vertex):
-    if isinstance(vertex, gen_statemachine.model.InitialState):
+    if isinstance(vertex, gen_fsm.model.InitialState):
         return vertex_namespace(vertex) + _initial_state_name
-    elif isinstance(vertex, gen_statemachine.model.TerminalState):
+    elif isinstance(vertex, gen_fsm.model.TerminalState):
         return vertex_namespace(vertex) + _terminal_state_name
     else:
         return vertex.name
@@ -114,7 +114,7 @@ def entered_states(transition):
             % endfor
 </%def>\
 <%def name="enter_substates(vertex)">\
-% if type(vertex) is gen_statemachine.model.State and vertex.sub_regions:
+% if type(vertex) is gen_fsm.model.State and vertex.sub_regions:
                 self._enter_state(State.${enum_name(vertex.sub_regions[0].initial_state)})
 ${enter_substates(vertex.sub_regions[0].initial_state)}\
 % endif

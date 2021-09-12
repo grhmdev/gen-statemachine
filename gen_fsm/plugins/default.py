@@ -1,7 +1,7 @@
 import logging
 import argparse
 from pathlib import Path
-from gen_statemachine.model import StateMachine
+from gen_fsm.model import StateMachine
 from typing import List
 
 # Mako rendering
@@ -31,7 +31,7 @@ class CodegenPlugin:
             dest="template_dir",
             help="Directory containing template files and other resources",
             type=Path,
-            default=Path.cwd() / "gen_statemachine/plugin_resources/python3/templates",
+            default=Path.cwd() / "gen_fsm/plugin_resources/python3/templates",
         )
         parser.add_argument(
             "--output",

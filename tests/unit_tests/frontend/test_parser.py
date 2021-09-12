@@ -3,8 +3,8 @@ from textwrap import dedent
 
 from tests.utilities import TestCaseBase
 
-from gen_statemachine.frontend.tokens import TokenType
-from gen_statemachine.frontend.parser import Parser
+from gen_fsm.frontend.tokens import TokenType
+from gen_fsm.frontend.parser import Parser
 
 
 class TestParser(TestCaseBase):

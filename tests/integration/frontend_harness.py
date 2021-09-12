@@ -1,7 +1,7 @@
 from tests.utilities import TestCaseBase
 from textwrap import dedent
-from gen_statemachine.model import StateMachine, ModelBuilder
-from gen_statemachine.frontend import Parser
+from gen_fsm.model import StateMachine, ModelBuilder
+from gen_fsm.frontend import Parser
 
 
 class FrontEndTestCase(TestCaseBase):
