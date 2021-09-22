@@ -1,0 +1,5 @@
+@startuml
+
+[*] --> [*] : /print("Hello world!")
+
+@enduml
