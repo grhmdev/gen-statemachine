@@ -23,8 +23,8 @@ class Program:
             type=Path,
         )
         parser.add_argument(
-            "--plugin",
-            dest="plugin",
+            "--codegen-module",
+            dest="codegen_module_name",
             help="Python module to import for statemachine code generation",
             type=str,
             default="gen_fsm.plugins.default",
@@ -35,10 +35,10 @@ class Program:
         args, plugin_args = self.parse_args()
 
         try:
-            codegen_plugin = importlib.import_module(args.plugin)
-            LOGGER.info(f"Found codegen module: {args.plugin}")
+            codegen_module = importlib.import_module(args.codegen_module_name)
+            LOGGER.info(f"Found codegen module: {args.codegen_module_name}")
         except ModuleNotFoundError as e:
-            LOGGER.error(f"Failed to import --plugin module: {args.plugin}")
+            LOGGER.error(f"Failed to import codegen module: {args.codegen_module_name}")
             LOGGER.exception(e)
             exit()
 
@@ -52,7 +52,7 @@ class Program:
                 statemachine_model = self.model_builder.build(parse_tree)
 
                 LOGGER.info("Invoking codegen module..")
-                codegen_plugin.generate_statemachine_code(
+                codegen_module.generate_statemachine_code(
                     statemachine_model, plugin_args
                 )
 
