@@ -1,32 +1,48 @@
-# Production rules
-# Used as a design aid only - not strictly valid EBNF :)
+# Production rules ###############################################################
+# - Used as a design aid only, not strictly valid EBNF :)
+# - Terminal symbols (ALL_CAPS) are expressed as regular expressions in tokens.py
+##################################################################################
 
-root = KEYWORD_START_UML [LABEL] NEWLINE declarations KEYWORD_END_UML
+root = KEYWORD_START_UML [LABEL] NEWLINE declarations KEYWORD_END_UML ;
 
-declarations = {declaration NEWLINE}+
+declarations = {declaration NEWLINE}+ ;
 
-declaration = state_declaration | state_alias_declaration | transition_declaration | anchored_note_declaration | floating_note_declaration | comment | state_label
+declaration = state_declaration
+            | state_alias_declaration
+            | state_label_declaration
+            | transition_declaration
+            | single_line_anchored_note
+            | multi_line_anchored_note
+            | floating_note_declaration
+            | single_line_comment
+            | multi_line_comment
+            ;
 
-entry_action = KEYWORD_ENTRY FORWARD_SLASH BEHAVIOR
+state_declaration = KEYWORD_STATE NAME [STEREOTYPE] (COLON state_label | OPEN_CURLY_BRACKET NEWLINE declarations CLOSE_CURLY_BRACKET) ;
 
-exit_action = KEYWORD_EXIT FORWARD_SLASH BEHAVIOR
+state_alias_declaration = KEYWORD_STATE QUOTATION LABEL QUOTATION KEYWORD_AS NAME [STEREOTYPE] [COLON state_label] ;
 
-state_declaration = KEYWORD_STATE NAME [STEREOTYPE] [COLON (entry_action | exit_action | LABEL) ] NEWLINE |
-                    KEYWORD_STATE NAME [STEREOTYPE] OPEN_CURLY_BRACKET NEWLINE declarations CLOSE_CURLY_BRACKET NEWLINE
+state_label_declaration = NAME COLON state_label ;
 
-state_alias_declaration = KEYWORD_STATE QUOTATION LABEL QUOTATION KEYWORD_AS NAME [STEREOTYPE] [COLON (entry_action | exit_action | LABEL)] NEWLINE
+transition_declaration = (NAME | INITIAL_FINAL_STATE) ARROW (NAME | INITIAL_FINAL_STATE) [STEREOTYPE] [COLON transition_label] ;
 
-state_label = NAME COLON (entry_action | exit_action | LABEL)
+single_line_anchored_note = KEYWORD_NOTE (KEYWORD_LEFT_OF | KEYWORD_RIGHT_OF) NAME COLON LABEL ;
 
-transition_declaration = (NAME | INITIAL_FINAL_STATE) ARROW (NAME | INITIAL_FINAL_STATE) [STEREOTYPE] NEWLINE |
-                         (NAME | INITIAL_FINAL_STATE) ARROW (NAME | INITIAL_FINAL_STATE) [STEREOTYPE] COLON transition_label NEWLINE
+multi_line_anchored_note KEYWORD_NOTE (KEYWORD_LEFT_OF | KEYWORD_RIGHT_OF) NAME NEWLINE {LABEL NEWLINE}+ KEYWORD_END KEYWORD_NOTE ;
 
-transition_label = [TRIGGER] [OPEN_SQ_BRACKET GUARD CLOSE_SQ_BRACKET] [FORWARD_SLASH BEHAVIOR]
+floating_note_declaration = KEYWORD_NOTE QUOTATION LABEL QUOTATION KEYWORD_AS NAME ;
 
-anchored_note_declaration = KEYWORD_NOTE (KEYWORD_LEFT_OF | KEYWORD_RIGHT_OF) NAME COLON LABEL NEWLINE |
-                            KEYWORD_NOTE (KEYWORD_LEFT_OF | KEYWORD_RIGHT_OF) NAME NEWLINE {LABEL NEWLINE}+ KEYWORD_END_UML KEYWORD_NOTE NEWLINE
+single_line_comment = APOSTROPHE LABEL ;
 
-floating_note_declaration = KEYWORD_NOTE QUOTATION LABEL QUOTATION KEYWORD_AS NAME NEWLINE
+multi_line_comment = START_BLOCK_COMMENT NEWLINE {LABEL NEWLINE}+ END_BLOCK_COMMENT ;
 
-comment = APOSTROPHE LABEL |
-          START_BLOCK_COMMENT NEWLINE {LABEL NEWLINE}+ END_BLOCK_COMMENT
+state_label = entry_action
+            | exit_action
+            | LABEL
+            ;
+
+entry_action = KEYWORD_ENTRY FORWARD_SLASH BEHAVIOR ;
+
+exit_action = KEYWORD_EXIT FORWARD_SLASH BEHAVIOR ;
+
+transition_label = [TRIGGER] [OPEN_SQ_BRACKET GUARD CLOSE_SQ_BRACKET] [FORWARD_SLASH BEHAVIOR] | LABEL ;
