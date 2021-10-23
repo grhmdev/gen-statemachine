@@ -1,44 +1,14 @@
-import gen_fsm
+import logging
 from re import S
 from typing import TextIO, List, Callable, NewType, Optional
 from dataclasses import dataclass, field
 
-from .lexer import LOGGER, Lexer
+from gen_fsm.frontend.lexer import Lexer
 from gen_fsm.frontend.tokens import Token, TokenType
+from gen_fsm.frontend.parse_tree import ParseTree, Node
 from gen_fsm.error import ProgramError
 
-
-@dataclass
-class Node:
-    token: Token
-    children: List["Node"] = field(default_factory=list)
-    parent: Optional["Node"] = None
-
-    def add_child(self, token: Token) -> "Node":
-        assert type(token) is Token
-        n = Node(token=token)
-        self.children.append(n)
-        n.parent = self
-        return n
-
-    def to_str(self, depth=0):
-        s = ("  " * depth) + "└ "
-        if self.token:
-            s += f"<{self.token.type}>: " + self.token.text.replace("\n", "\\n")
-        else:
-            s += "root"
-
-        for child in self.children:
-            s += "\n" + child.to_str(depth + 1)
-        return s
-
-
-class ParseTree:
-    def __init__(self):
-        self.root_node = Node(Token(TokenType.root))
-
-    def __str__(self):
-        return self.root_node.to_str()
+LOGGER = logging.getLogger(__name__)
 
 
 class ParseError(ProgramError):
@@ -91,7 +61,7 @@ class Parser:
         return self.parse_tree
 
     def parse_root(self):
-        # root = KEYWORD_START_UML [LABEL] NEWLINE declarations KEYWORD_END_UML
+        # root = KEYWORD_START_UML [LABEL] NEWLINE declarations KEYWORD_END_UML ;
         root_node = self.parse_tree.root_node
 
         # KEYWORD_START_UML
