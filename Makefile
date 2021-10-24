@@ -23,9 +23,9 @@ run-output:
 	${RUN_OUTPUT}
 
 example-washing-machine:
-	${RUN_GEN_FSM} examples/washing_machine.puml
+	${RUN_GEN_FSM} examples/washing_machine.puml ./output
 	${RUN_OUTPUT}
 
 example-hello-world:
-	${RUN_GEN_FSM} examples/hello_world.puml
+	${RUN_GEN_FSM} examples/hello_world.puml ./output
 	${RUN_OUTPUT}

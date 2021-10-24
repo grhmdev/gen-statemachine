@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/gen_fsm/main.py",
-            "args": ["${workspaceFolder}/examples/washing_machine.puml"],
+            "args": ["${workspaceFolder}/examples/washing_machine.puml", "${workspaceFolder}/output", "--diag"],
             "console": "integratedTerminal"
         },
         {

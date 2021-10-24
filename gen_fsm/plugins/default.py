@@ -14,13 +14,18 @@ from io import StringIO
 LOGGER = logging.getLogger(__name__)
 
 
-def generate_statemachine_code(statemachine_model: StateMachine, args: List[str]):
-    codegen = CodegenPlugin(statemachine_model, args)
+def generate_statemachine_code(
+    statemachine_model: StateMachine, output_dir: Path, args: List[str]
+):
+    codegen = CodegenPlugin(statemachine_model, output_dir, args)
     codegen.run()
 
 
 class CodegenPlugin:
-    def __init__(self, statemachine_model: StateMachine, raw_args: List[str]):
+    def __init__(
+        self, statemachine_model: StateMachine, output_dir: Path, raw_args: List[str]
+    ):
+        self.output_dir = output_dir
         self.args = self.parse_args(raw_args)
         self.mako_renderer = MakoRenderer(self.args.template_dir, statemachine_model)
 
@@ -33,19 +38,11 @@ class CodegenPlugin:
             type=Path,
             default=Path.cwd() / "gen_fsm/plugin_resources/python3/templates",
         )
-        parser.add_argument(
-            "--output",
-            dest="output_dir",
-            help="Directory to generate output",
-            type=Path,
-            default=Path.cwd() / "output",
-        )
         return parser.parse_args(args)
 
     def run(self):
         LOGGER.info("Generating statemachine code..")
         LOGGER.info(f"--templates {self.args.template_dir}")
-        LOGGER.info(f"--output {self.args.output_dir}")
 
         # Check the arguments are valid
         if not self.args.template_dir.exists():
@@ -54,8 +51,7 @@ class CodegenPlugin:
             )
 
         # Create the output directory if it does not yet exist
-        if not self.args.output_dir.exists():
-            self.args.output_dir.mkdir(parents=True, exist_ok=True)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Begin iterating through template files
         self.process_dir(self.args.template_dir)
@@ -101,7 +97,7 @@ class CodegenPlugin:
     def get_output_path(self, input_path: Path) -> Path:
         """Creates output path for a file, preserving the relative path from the input directory."""
         relative_path = input_path.relative_to(self.args.template_dir)
-        return self.args.output_dir / relative_path
+        return self.output_dir / relative_path
 
 
 class MakoRenderer:
