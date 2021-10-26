@@ -23,20 +23,13 @@ class EndToEndTestCase(TestCaseBase):
         self.input_file = (
             Path(__file__).parent.absolute() / "diagrams" / (test_name + ".puml")
         )
-        sys.argv = [
-            __name__,
-            str(self.input_file),
-            "--plugin",
-            "gen_fsm.plugins.default",
-            "--output",
-            str(self.output_dir),
-        ]
+        sys.argv = [__name__, str(self.input_file), str(self.output_dir), "--diag"]
         # Add the output dir to the path to import the generated modules from
         sys.path.append(str(self.output_dir))
 
     def run_program(self):
         logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-        program = gen_fsm.main.Program()
+        program = gen_fsm.main.Program(enable_stdout_debug=lambda: None)
         program.run()
 
     def import_statemachine_module(self):

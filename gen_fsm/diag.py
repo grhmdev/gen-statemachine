@@ -1,7 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 import logging
-from error import ProgramError
+from gen_fsm.error import ProgramError
 
 LOGGER = logging.getLogger(__name__)
 LOG_FORMAT = "%(asctime)s:%(levelname)s:%(name)s: %(message)s"

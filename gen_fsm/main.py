@@ -6,7 +6,7 @@ from gen_fsm import model
 from pathlib import Path
 from sys import stdout
 from typing import Callable, Tuple, List
-import diag
+from gen_fsm.diag import Diagnostics, NullDiagnostics, LOG_FORMAT
 
 LOGGER = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class Program:
     def __init__(self, enable_stdout_debug: Callable):
         self.parser = frontend.Parser()
         self.model_builder = model.ModelBuilder()
-        self.diag = diag.NullDiagnostics()
+        self.diag = NullDiagnostics()
         self.enable_stdout_debug = enable_stdout_debug
 
     def parse_args(self) -> Tuple[argparse.Namespace, List[str]]:
@@ -60,7 +60,7 @@ class Program:
             self.enable_stdout_debug()
 
         if args.enable_diag:
-            self.diag = diag.Diagnostics(args.output_dir / "logs")
+            self.diag = Diagnostics(args.output_dir / "logs")
 
         try:
             codegen_module = importlib.import_module(args.codegen_module_name)
@@ -98,7 +98,7 @@ def main():
 
     stream_handler = logging.StreamHandler(stream=stdout)
     stream_handler.setLevel(level=logging.INFO)
-    stream_handler.setFormatter(logging.Formatter(diag.LOG_FORMAT))
+    stream_handler.setFormatter(logging.Formatter(LOG_FORMAT))
     logging.getLogger().addHandler(stream_handler)
 
     program = Program(
