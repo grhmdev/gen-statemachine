@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import datetime
+import os
 import logging
 from gen_fsm.error import ProgramError
 
@@ -25,8 +26,12 @@ class Diagnostics:
     """
 
     def __init__(self, output_dir: Path):
-        self.output_dir = output_dir / datetime.now().strftime("%Y%d%m_%H%M%S_%f")
+        self.output_dir = output_dir / datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         self.output_dir.mkdir(parents=True, exist_ok=False)
+        latest_dir = output_dir / "latest"
+        if latest_dir.exists():
+            latest_dir.unlink()
+        os.symlink(self.output_dir, output_dir / "latest")
         self._init_log_file()
 
     def _init_log_file(self):
