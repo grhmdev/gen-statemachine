@@ -7,7 +7,7 @@ skinparam nodesep 100
 ' Set box spacing in the Y plane
 skinparam ranksep 100
 
-title Statemachine Model v1.0
+title FSM Model
 
 ' Classes
 class StateType <<Enum>> {
@@ -30,7 +30,7 @@ class State {
 
 }
 class InitialState
-class FinalState
+class TerminalState
 class PseudoState {
 
 }
@@ -61,7 +61,7 @@ Vertex "2" o-- "0..*" Transition
 Vertex <|-- State
 State *-- "0..2" Action 
 State <|-- InitialState
-State <|-- FinalState
+State <|-- TerminalState
 
 ' Psuedostate relations
 Vertex <|-- PseudoState
