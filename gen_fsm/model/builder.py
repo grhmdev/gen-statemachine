@@ -244,21 +244,21 @@ class TransitionBuilder:
             self.transition_label_node, [TokenType.TRIGGER]
         ):
             self.transition.trigger = self.statemachine.new_event()
-            self.transition.trigger.name = event_token.text
+            self.transition.trigger.name = event_token.text.strip()
 
     def add_guard(self):
         if guard_token := find_first_token(
             self.transition_label_node, [TokenType.GUARD]
         ):
             self.transition.guard = self.statemachine.new_guard()
-            self.transition.guard.condition = guard_token.text
+            self.transition.guard.condition = guard_token.text.strip()
 
     def add_action(self):
         if action_token := find_first_token(
             self.transition_label_node, [TokenType.BEHAVIOR]
         ):
             self.transition.action = self.statemachine.new_action()
-            self.transition.action.text = action_token.text
+            self.transition.action.text = action_token.text.strip()
 
 
 class RegionBuilder:
