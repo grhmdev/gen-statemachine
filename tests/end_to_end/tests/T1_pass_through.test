@@ -1,0 +1,39 @@
+@startuml
+
+'title T1_pass_through
+
+state A
+state B
+state C
+
+[*] --> A : /print("Transition 1")
+
+state A : entry/ print("Entered State A")
+state A : exit/ print("Exited State A")
+
+A --> B : /print("Transition 2")
+
+state B : entry/ print("Entered State B")
+state B : exit/ print("Exited State B")
+
+B --> C : /print("Transition 3")
+
+state C : entry/ print("Entered State C")
+state C : exit/ print("Exited State C")
+
+C --> [*] : /print("Transition 4")
+
+@enduml
+
+@startexpected
+Transition 1
+Entered State A
+Exited State A
+Transition 2
+Entered State B
+Exited State B
+Transition 3
+Entered State C
+Exited State C
+Transition 4
+@endexpected

@@ -1,0 +1,33 @@
+@startuml
+
+'title T4_cross_region_entry_exit
+
+state A {
+    state B {
+        state C
+    }
+}
+state End <<end>>
+
+state A : entry/ print("Entered State A")
+state A : exit/ print("Exited State A")
+state B : entry/ print("Entered State B")
+state B : exit/ print("Exited State B")
+state C : entry/ print("Entered State C")
+state C : exit/ print("Exited State C")
+
+[*] --> C : /print("Transition 1")
+C --> End : /print("Transition 2")
+
+@enduml
+
+@startexpected
+Transition 1
+Entered State A
+Entered State B
+Entered State C
+Exited State C
+Exited State B
+Exited State A
+Transition 2
+@endexpected

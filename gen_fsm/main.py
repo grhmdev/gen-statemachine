@@ -1,12 +1,14 @@
 import logging
 import argparse
 import importlib
-from gen_fsm import frontend
-from gen_fsm import model
+import inspect
+from gen_fsm import frontend, backend, model
 from pathlib import Path
 from sys import stdout
 from typing import Callable, Tuple, List
 from gen_fsm.diag import Diagnostics, NullDiagnostics, LOG_FORMAT
+from gen_fsm.error import ProgramError
+from gen_fsm.model.model import StateMachine
 
 LOGGER = logging.getLogger(__name__)
 
@@ -15,6 +17,7 @@ class Program:
     def __init__(self, enable_stdout_debug: Callable):
         self.parser = frontend.Parser()
         self.model_builder = model.ModelBuilder()
+        self.target_generator = backend.TargetGenerator()
         self.diag = NullDiagnostics()
         self.enable_stdout_debug = enable_stdout_debug
 
@@ -45,49 +48,54 @@ class Program:
             default=False,
         )
         parser.add_argument(
-            "--codegen-module",
-            dest="codegen_module_name",
-            help="Python module to import for statemachine code generation",
+            "--target",
+            dest="target_name",
+            help="Name of target for code generation. Available targets: [`python3/native`]",
             type=str,
-            default="gen_fsm.plugins.default",
+            default="python3/native",
+        )
+        parser.add_argument(
+            "--generate-entrypoint",
+            action="store_true",
+            dest="generate_entrypoint",
+            help="Generate entrypoint code (e.g. `main` file)",
+            default=False,
         )
         return parser.parse_known_args()
 
     def run(self):
-        args, plugin_args = self.parse_args()
-
-        if args.enable_debug_logging:
-            self.enable_stdout_debug()
-
-        if args.enable_diag:
-            self.diag = Diagnostics(args.output_dir / "logs")
 
         try:
-            codegen_module = importlib.import_module(args.codegen_module_name)
-            LOGGER.info(f"Found codegen module: {args.codegen_module_name}")
-        except ModuleNotFoundError as e:
-            LOGGER.error(f"Failed to import codegen module: {args.codegen_module_name}")
-            LOGGER.exception(e)
-            exit()
+            args, _ = self.parse_args()
 
-        with open(args.input_file, "r") as file:
-            try:
-                LOGGER.info("Generating parse tree..")
+            if args.enable_debug_logging:
+                self.enable_stdout_debug()
+            LOGGER.debug(f"Parsed args: {args}")
+
+            if args.enable_diag:
+                self.diag = Diagnostics(args.output_dir / "logs")
+
+            LOGGER.info("Generating parse tree..")
+            parse_tree: frontend.ParseTree = None
+            with open(args.input_file, "r") as file:
                 parse_tree = self.parser.parse_puml(file)
-                self.diag.save_text_file(str(parse_tree), "parse_tree.txt")
+            self.diag.save_text_file(str(parse_tree), "parse_tree.txt")
 
-                LOGGER.info("Generating statemachine model..")
-                statemachine_model = self.model_builder.build(parse_tree)
+            LOGGER.info("Generating statemachine model..")
+            statemachine: StateMachine = self.model_builder.build(parse_tree)
 
-                LOGGER.info("Invoking codegen module..")
-                codegen_module.generate_statemachine_code(
-                    statemachine_model, args.output_dir, plugin_args
-                )
+            LOGGER.info("Generating statemachine code..")
+            args.output_dir.mkdir(parents=True, exist_ok=True)
+            self.target_generator.generate(
+                args.target_name, args.output_dir, statemachine
+            )
 
-            except frontend.ParseError as e:
-                LOGGER.exception(e)
-            except Exception as e:
-                LOGGER.exception(e)
+            LOGGER.info("Done!")
+        except ProgramError as e:
+            LOGGER.error(e)
+        except Exception as e:
+            program_error = ProgramError(f"{e}")
+            LOGGER.exception(program_error)
 
 
 def main():

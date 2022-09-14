@@ -1,0 +1,32 @@
+@startuml
+
+'title T5_event_pass_through
+
+state A
+state B
+
+[*] --> A : /print("Transition 1")
+
+state A : entry/ print("Entered State A")
+state A : entry/ self.queue_event(Event.event1)
+state A : exit/ print("Exited State A")
+
+A --> B : event1/print("Transition 2")
+
+state B : entry/ print("Entered State B")
+state B : entry/ self.queue_event(Event.event2)
+state B : exit/ print("Exited State B")
+
+B --> [*] : event2/print("Transition 3")
+
+@enduml
+
+@startexpected
+Transition 1
+Entered State A
+Exited State A
+Transition 2
+Entered State B
+Exited State B
+Transition 3
+@endexpected

@@ -8,7 +8,7 @@ class ProgramError(RuntimeError):
     def __str__(self):
         return f"""
 =======================================
-ʘ︵ʘ oh no!!!
+ʘ︵ʘ oh no!!
 {self.error_message}
 =======================================
 """

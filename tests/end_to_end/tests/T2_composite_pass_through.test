@@ -1,0 +1,33 @@
+@startuml
+
+'title T2_composite_pass_through
+
+state A {
+    state B
+}
+
+
+state A : entry/ print("Entered State A")
+state A : exit/ print("Exited State A")
+state B : entry/ print("Entered State B")
+state B : exit/ print("Exited State B")
+
+[*] --> A : /print("Transition 1")
+state A {
+    [*] --> B : /print("Transition 2")
+    B --> [*] : /print("Transition 3")
+}
+A --> [*] : /print("Transition 4")
+
+@enduml
+
+@startexpected
+Transition 1
+Entered State A
+Transition 2
+Entered State B
+Exited State B
+Transition 3
+Exited State A
+Transition 4
+@endexpected

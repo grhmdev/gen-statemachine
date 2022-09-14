@@ -1,0 +1,16 @@
+@startuml
+
+'title T6_event_actions
+
+state A : entry/ self.queue_event(Event.event2)
+state B
+
+[*] --> A
+A --> B : event1 / print("Processing event1")
+A --> B : event2 / print("Processing event2")
+
+@enduml
+
+@startexpected
+Processing event2
+@endexpected

@@ -2,6 +2,7 @@
 .temp/
 _pycache_/
 output/
+results/
 
 *.png
 *.pyc

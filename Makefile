@@ -2,7 +2,7 @@ install:
 	poetry install
 
 test:
-	poetry run python -m unittest discover
+	poetry run python -m unittest discover tests/
 
 format:
 	poetry run python -m black gen_fsm/*
@@ -13,8 +13,11 @@ lint:
 
 diagrams:
 	plantuml examples/**/*.puml
-	plantuml tests/**/*.puml
+	plantuml tests/**/*.test
 	plantuml gen_fsm/**/*.puml
+
+clean:
+	rm -R output/
 
 RUN_GEN_FSM = poetry run python gen_fsm/main.py
 RUN_OUTPUT = poetry run python output/main.py

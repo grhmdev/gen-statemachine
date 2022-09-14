@@ -123,7 +123,7 @@ patterns = {
     TokenType.INITIAL_FINAL_STATE: r"^\[\*\]\Z",
     TokenType.ARROW: r"^-(up|down|left|right)?(\[.*\])?->\Z",
     TokenType.NAME: r"^[a-zA-Z0-9_]+\Z",
-    TokenType.LABEL: r"^(?! )[a-zA-Z0-9 ?!,.\(\)\\/]+\Z",
+    TokenType.LABEL: r"^(?! )[a-zA-Z0-9 ?!,._\(\)\\/]+\Z",
     TokenType.TRIGGER: r"^(?! )((?!\[|\/).)+\Z",
     TokenType.GUARD: r"^(?! )((?!\]|\/).)+\Z",
     TokenType.BEHAVIOR: r"^(?! ).+\Z",

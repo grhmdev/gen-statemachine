@@ -1,0 +1,15 @@
+# Python3 Native State Machine Generation Files
+
+target = "python3/native"
+
+[files]
+
+[files.main]
+tags = ["source", "entrypoint"]
+path = "main.py"
+destination = "main.py"
+
+[files.statemachine]
+tags = ["mako"]
+path = "statemachine.mako"
+destination = "statemachine.py"

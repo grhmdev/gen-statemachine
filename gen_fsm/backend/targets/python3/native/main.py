@@ -1,8 +1,8 @@
-from statemachine import Statemachine
+from statemachine import StateMachine
 
 
 def main():
-    sm = Statemachine()
+    sm = StateMachine()
     sm.start()
 
 
