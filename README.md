@@ -1,6 +1,6 @@
-# gen_fsm
+# gen_statemachine
 
-`gen_fsm` generates state machine code from PlantUML's [state diagrams](https://plantuml.com/state-diagram). It features an extensible backend that can be used to target any language or implementation. It aims to remove the need for programmers to write boilerplate code, allowing them to focus on state machine design rather than implementation.
+`gen_statemachine` generates state machine code from PlantUML's [state diagrams](https://plantuml.com/state-diagram). It features an extensible backend that can be used to target any language or implementation. It aims to remove the need for programmers to write boilerplate code, allowing them to focus on state machine design rather than implementation.
 
 ## Supported language
 
