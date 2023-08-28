@@ -14,6 +14,7 @@ class ParseError(ProgramError):
     ProgramError that reports an area when parsing a specific position within
     a file
     """
+
     def __init__(self, detail: str, file_name: str, line_no: int, column_no: int):
         super().__init__(
             f"Parse error @ [{file_name}:{line_no}:{column_no}]" + "\n" + detail
