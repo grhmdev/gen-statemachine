@@ -3,10 +3,10 @@ from re import S
 from typing import TextIO, List, Callable, NewType, Optional
 from dataclasses import dataclass, field
 
-from gen_fsm.frontend.lexer import Lexer
-from gen_fsm.frontend.tokens import Token, TokenType
-from gen_fsm.frontend.parse_tree import ParseTree, Node
-from gen_fsm.error import ProgramError
+from gen_statemachine.frontend.lexer import Lexer
+from gen_statemachine.frontend.tokens import Token, TokenType
+from gen_statemachine.frontend.parse_tree import ParseTree, Node
+from gen_statemachine.error import ProgramError
 
 LOGGER = logging.getLogger(__name__)
 

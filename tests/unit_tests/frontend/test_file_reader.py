@@ -1,7 +1,7 @@
 import unittest
 from tests.utilities import TestCaseBase
 
-from gen_fsm.frontend.lexer import FileReader
+from gen_statemachine.frontend.lexer import FileReader
 
 
 class TestFileReader(TestCaseBase):

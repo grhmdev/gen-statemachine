@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Optional
 from dataclasses import dataclass, field
 
-from gen_fsm.frontend.tokens import Token, TokenType
+from gen_statemachine.frontend.tokens import Token, TokenType
 
 
 class ParseTree:

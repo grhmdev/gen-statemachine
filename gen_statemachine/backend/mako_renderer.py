@@ -6,7 +6,7 @@ from mako.runtime import Context
 from mako import exceptions
 from io import StringIO
 
-from gen_fsm.model import StateMachine
+from gen_statemachine.model import StateMachine
 
 LOGGER = logging.getLogger(__name__)
 

@@ -1,5 +1,5 @@
 from pathlib import Path
-import gen_fsm.main
+import gen_statemachine.main
 import shutil
 import importlib.util
 import io
@@ -26,12 +26,12 @@ class EndToEndTestCase(TestCaseBase):
         self.log_file = self.output_dir / "test.log"
         logging.basicConfig(filename=self.log_file, filemode="w", level=logging.DEBUG)
 
-    def run_gen_fsm(self):
+    def run_gen_statemachine(self):
         # Set program args & logging config
         sys.argv = [__name__, str(self.test_spec), str(self.output_dir), "--diag"]
         # logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
-        program = gen_fsm.main.Program(enable_stdout_debug=lambda: None)
+        program = gen_statemachine.main.Program(enable_stdout_debug=lambda: None)
         program.run()
 
     def read_expected_output(self) -> List[str]:
@@ -63,7 +63,7 @@ class EndToEndTestCase(TestCaseBase):
     def run_test(self):
         expected_output = self.read_expected_output()
 
-        self.run_gen_fsm()
+        self.run_gen_statemachine()
         output = self.run_statemachine()
 
         self.assertEqual(output, expected_output)

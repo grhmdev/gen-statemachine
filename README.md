@@ -4,7 +4,7 @@
 
 ## Supported language
 
-> Note: `gen_fsm` is not a syntax checker, nor will it enforce completely correct grammar
+> Note: `gen_statemachine` is not a syntax checker, nor will it enforce completely correct grammar
 
 The following PlantUML language features are supported:
 
@@ -82,7 +82,7 @@ TransactionInProgress --> TransactionSucceeded : StatusReceived [status is Statu
 
 ## Examples
 
-After installing with `make install`, try running one of the examples below. These are simple and self-contained programs that demonstrate some of the capability of `gen_fsm`.
+After installing with `make install`, try running one of the examples below. These are simple and self-contained programs that demonstrate some of the capability of `gen_statemachine`.
 
 1. `make example-hello-world`
 

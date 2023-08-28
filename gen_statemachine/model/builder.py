@@ -1,9 +1,9 @@
 import logging
 from typing import Optional, List, Type
 
-from gen_fsm.frontend import ParseTree
-from gen_fsm.frontend.tokens import Token, TokenType, STEREOTYPE_TOKEN_TYPES
-from gen_fsm.frontend import Node as ParseTreeNode
+from gen_statemachine.frontend import ParseTree
+from gen_statemachine.frontend.tokens import Token, TokenType, STEREOTYPE_TOKEN_TYPES
+from gen_statemachine.frontend import Node as ParseTreeNode
 from .model import *
 
 LOGGER = logging.getLogger(__name__)

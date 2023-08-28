@@ -1,17 +1,17 @@
 from dataclasses import dataclass
 import logging
 from pathlib import Path
-from gen_fsm.error import ProgramError
-from gen_fsm.model import StateMachine
+from gen_statemachine.error import ProgramError
+from gen_statemachine.model import StateMachine
 from typing import List
 
-from gen_fsm.backend.manifest import (
+from gen_statemachine.backend.manifest import (
     FileType,
     TargetFile,
     TargetManifest,
     load_target_manifest,
 )
-from gen_fsm.backend.mako_renderer import MakoRenderer
+from gen_statemachine.backend.mako_renderer import MakoRenderer
 
 
 LOGGER = logging.getLogger(__name__)

@@ -2,13 +2,13 @@ import logging
 import argparse
 import importlib
 import inspect
-from gen_fsm import frontend, backend, model
+from gen_statemachine import frontend, backend, model
 from pathlib import Path
 from sys import stdout
 from typing import Callable, Tuple, List
-from gen_fsm.diag import Diagnostics, NullDiagnostics, LOG_FORMAT
-from gen_fsm.error import ProgramError
-from gen_fsm.model.model import StateMachine
+from gen_statemachine.diag import Diagnostics, NullDiagnostics, LOG_FORMAT
+from gen_statemachine.error import ProgramError
+from gen_statemachine.model.model import StateMachine
 
 LOGGER = logging.getLogger(__name__)
 

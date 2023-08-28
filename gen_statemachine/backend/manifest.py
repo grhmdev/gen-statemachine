@@ -5,7 +5,7 @@ from pydantic import BaseModel
 import tomli
 from pathlib import Path
 
-from gen_fsm.error import ProgramError
+from gen_statemachine.error import ProgramError
 
 
 class FileType(Enum):
