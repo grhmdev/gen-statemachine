@@ -12,10 +12,14 @@ LOGGER = logging.getLogger(__name__)
 class Program:
     """
     Responsible for the high level execution of the program,
-    and catching any emitted errors
+    and catching any errors raised
     """
 
     def __init__(self, enable_stdout_debug: Callable):
+        """
+        Arguments:
+        - enable_stdout_debug: Enables debug logging to stdout
+        """
         self.parser = frontend.Parser()
         self.model_builder = model.ModelBuilder()
         self.target_generator = backend.TargetGenerator()
@@ -23,6 +27,16 @@ class Program:
         self.enable_stdout_debug = enable_stdout_debug
 
     def run(self):
+        """
+        Runs the following steps:
+        0. Parses command line arguments
+        1. The Parser takes the input PlantUML file and generates a ParseTree
+           that represents the file's text
+        2. The ModelBuilder then takes the ParseTree and generates a
+           StateMachine model from it
+        3. The StateMachine model is passed to the TargetGenerator which
+           performs code generation for the target language
+        """
         try:
             args, _ = parse_args()
 

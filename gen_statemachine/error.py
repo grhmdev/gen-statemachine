@@ -1,8 +1,17 @@
+"""
+Contains custom error types common to all layers
+"""
 from dataclasses import dataclass
 
 
 @dataclass
 class ProgramError(RuntimeError):
+    """
+    Error class providing a consistent format for
+    all program errors. May be initialised directly,
+    or subtyped.
+    """
+
     error_message: str
 
     def __str__(self):

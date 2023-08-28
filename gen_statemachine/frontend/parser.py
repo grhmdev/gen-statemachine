@@ -10,6 +10,10 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ParseError(ProgramError):
+    """
+    ProgramError that reports an area when parsing a specific position within
+    a file
+    """
     def __init__(self, detail: str, file_name: str, line_no: int, column_no: int):
         super().__init__(
             f"Parse error @ [{file_name}:{line_no}:{column_no}]" + "\n" + detail
@@ -18,8 +22,8 @@ class ParseError(ProgramError):
 
 class Parser:
     """
-    This parser is responsible for creating "setences" out of the "words" found by the
-    lexer. It drives the parser by telling it exactly what to look for, and what to discard.
+    This parser is responsible for creating "sentences" out of the "words" found by the
+    lexer. It drives the Lexer by telling it exactly what to look for, and what to discard.
     If a word token is found that doesn't match the current sentence being parsed, then a
     `ParseError` is raised.
     """
@@ -55,10 +59,10 @@ class Parser:
     def parse_puml(self, file: TextIO) -> ParseTree:
         self.lexer = Lexer(file)
         self.file_name = file.name
-        self.parse_root()
+        self._parse_root()
         return self.parse_tree
 
-    def parse_root(self):
+    def _parse_root(self):
         # root = KEYWORD_START_UML [LABEL] NEWLINE declarations KEYWORD_END_UML ;
         root_node = self.parse_tree.root_node
 
@@ -82,14 +86,14 @@ class Parser:
             )
 
         # declarations
-        end_token = self.parse_declarations(
+        end_token = self._parse_declarations(
             root_node, terminal_token=TokenType.KEYWORD_END_UML
         )
 
         # KEYWORD_END_UML
         root_node.add_child(end_token)
 
-    def parse_declarations(self, parent_node, terminal_token: TokenType) -> Token:
+    def _parse_declarations(self, parent_node, terminal_token: TokenType) -> Token:
         """Parses declarations until `terminal_token` is found and returned"""
         # declarations = {declaration NEWLINE}+
         declarations_node = parent_node.add_child(Token(TokenType.declarations))
@@ -126,17 +130,17 @@ class Parser:
             elif token.type is terminal_token:
                 return token
             elif token.type is TokenType.KEYWORD_STATE:
-                self.parse_state_declaration(declarations_node, token)
+                self._parse_state_declaration(declarations_node, token)
             elif token.type in [TokenType.START_BLOCK_COMMENT, TokenType.APOSTROPHE]:
-                self.parse_comment(declarations_node, token)
+                self._parse_comment(declarations_node, token)
             elif token.type is TokenType.KEYWORD_NOTE:
-                self.parse_note_declaration(declarations_node, token)
+                self._parse_note_declaration(declarations_node, token)
             elif token.type in [TokenType.INITIAL_FINAL_STATE, TokenType.NAME]:
-                self.parse_transition_declaration_or_state_label(
+                self._parse_transition_declaration_or_state_label(
                     declarations_node, token
                 )
 
-    def parse_transition_declaration_or_state_label(
+    def _parse_transition_declaration_or_state_label(
         self, parent_node: Node, first_token: Token
     ):
         # Look for arrow or colon to determine production rule
@@ -145,11 +149,11 @@ class Parser:
             tokens_to_skip=[TokenType.WHITESPACE],
         )
         if second_token.type is TokenType.ARROW:
-            self.parse_transition_declaration(parent_node, first_token, second_token)
+            self._parse_transition_declaration(parent_node, first_token, second_token)
         else:
-            self.parse_state_label(parent_node, first_token, second_token)
+            self._parse_state_label(parent_node, first_token, second_token)
 
-    def parse_state_declaration(self, parent_node: Node, first_token: Token):
+    def _parse_state_declaration(self, parent_node: Node, first_token: Token):
         LOGGER.debug("start of state_declaration")
 
         # Create node for production rule
@@ -235,7 +239,7 @@ class Parser:
 
         if next_token.type is TokenType.OPEN_CURLY_BRACKET:
             # Look for nested state declarations and state transitions
-            self.parse_declarations(
+            self._parse_declarations(
                 state_node, terminal_token=TokenType.CLOSE_CURLY_BRACKET
             )
         elif next_token.type is TokenType.COLON:
@@ -273,7 +277,7 @@ class Parser:
 
         LOGGER.debug("end of state_declaration")
 
-    def parse_transition_declaration(
+    def _parse_transition_declaration(
         self, parent_node: Node, name_token: Token, arrow_token: Token
     ):
         LOGGER.debug("start of transition_declaration")
@@ -372,7 +376,7 @@ class Parser:
 
         LOGGER.debug("end of transition_declaration")
 
-    def parse_note_declaration(self, parent_node: Node, first_token: Token):
+    def _parse_note_declaration(self, parent_node: Node, first_token: Token):
         LOGGER.debug("start of note_declaration")
         # Create node for production rule
         note_token = Token(
@@ -464,7 +468,7 @@ class Parser:
 
         LOGGER.debug("end of note_declaration")
 
-    def parse_state_label(
+    def _parse_state_label(
         self, parent_node: Node, name_token: Token, colon_token: Token
     ):
         LOGGER.debug("start of state_label")
@@ -512,7 +516,7 @@ class Parser:
 
         LOGGER.debug("end of state_label")
 
-    def parse_comment(self, parent_node: Node, first_token: Token):
+    def _parse_comment(self, parent_node: Node, first_token: Token):
         LOGGER.debug("start of comment")
         # Create node for production rule
         comment_token = Token(type=TokenType.comment, start_line=first_token.start_line)

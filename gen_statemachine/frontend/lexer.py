@@ -8,6 +8,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 class FilePosition:
+    """
+    Represents a position of a character in a text file, where the line number
+    is expected to start from 1 and the column number from 0.
+    """
+
     def __init__(self, line_no: int = 1, column_no: int = 0):
         assert line_no >= 1
         assert column_no >= 0
@@ -90,7 +95,7 @@ class Lexer:
         """
         Attempts to scan the file for the first token that is in the `take` list and not
         in the `skip` list. If no tokens from the `take` list are found, then an EOF token
-        is returned (because we looked up until the end)
+        is returned (because we scanned until the end)
         """
         # Combine take and skip to find both types, tokens
         # in the skip list will simply be discarded once found

@@ -1,3 +1,8 @@
+"""
+Defines the set of tokens that the state diagram text is composed
+from and the corresponding regex patterns the Lexer uses to identify them.
+"""
+
 from enum import Enum, auto
 from dataclasses import dataclass
 

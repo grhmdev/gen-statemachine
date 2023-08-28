@@ -9,9 +9,14 @@ from gen_statemachine.program import Program
 
 
 def main():
-    # The root logger is configured for full verbosity here so
-    # that any attached logging handlers can configure the
-    # desired verbosity themselves
+    """
+    Configures initial logging and then initialises and runs the `Program`
+    """
+    # Logging handlers attached to the root logger may only
+    # log at the same or lower verbosity to the root logger.
+    # The root logger is set for full verbosity here which
+    # allows any attached handlers to choose from the full
+    # range of verbosity levels.
     logging.getLogger().setLevel(logging.DEBUG)
 
     stream_handler = logging.StreamHandler(stream=stdout)

@@ -22,6 +22,10 @@ class ParseTree:
 
 @dataclass
 class Node:
+    """
+    ParseTree node
+    """
+
     token: Token
     children: List["Node"] = field(default_factory=list)
     parent: Optional["Node"] = None
