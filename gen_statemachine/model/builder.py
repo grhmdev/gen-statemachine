@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, List, Type
+from typing import Optional, List
 
 from gen_statemachine.frontend import ParseTree
 from gen_statemachine.frontend.tokens import Token, TokenType, STEREOTYPE_TOKEN_TYPES

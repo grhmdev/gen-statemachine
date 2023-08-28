@@ -1,7 +1,5 @@
 import logging
-from re import S
-from typing import TextIO, List, Callable, NewType, Optional
-from dataclasses import dataclass, field
+from typing import TextIO, List
 
 from gen_statemachine.frontend.lexer import Lexer
 from gen_statemachine.frontend.tokens import Token, TokenType

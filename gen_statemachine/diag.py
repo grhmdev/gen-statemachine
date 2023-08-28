@@ -2,7 +2,6 @@ from pathlib import Path
 from datetime import datetime
 import os
 import logging
-from gen_statemachine.error import ProgramError
 
 LOGGER = logging.getLogger(__name__)
 LOG_FORMAT = "%(asctime)s:%(levelname)s:%(name)s: %(message)s"
