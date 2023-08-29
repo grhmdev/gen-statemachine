@@ -7,19 +7,23 @@ skinparam nodesep 100
 ' Set box spacing in the Y plane
 skinparam ranksep 100
 
-title FSM Model
+title StateMachine Model
 
-' Classes
-class StateType <<Enum>> {
+enum StateType <<Enum>> {
     INVALID
     SIMPLE
     COMPOSITE
 }
-class Entity {
+
+' Classes
+abstract class Entity {
+    Base class for all model classes
+    
     id: str
     description: Optional[str]
 }
-class Statemachine <<Entity>> {
+
+class StateMachine <<Entity>> {
 
 }
 class Region <<Entity>>
@@ -27,7 +31,7 @@ class Vertex <<Entity>> {
     stereotype: Optional[str]
 }
 class State {
-
+    type: StateType
 }
 class InitialState
 class TerminalState
@@ -47,29 +51,30 @@ class Guard <<Entity>> {
 class Action <<Entity>> {
     text: str
 }
-' Statemachine relations
-Statemachine "1..*" *-right- "1" Region
+' StateMachine relations
+StateMachine "1" *-right- "1" Region
 
 ' Region relations
 Region "1" *-right- "0..*" Vertex
-Region *-- "0..*" Transition
+Region *--> "0..*" Transition
 
 ' Vertex relations
-Vertex "2" o-- "0..*" Transition
+Vertex "2" o--> "0..*" Transition
 
 ' State relations
 Vertex <|-- State
-State *-- "0..2" Action 
+State *--> "0..2" Action 
 State <|-- InitialState
 State <|-- TerminalState
+State "0..*" *--> Region
 
 ' Psuedostate relations
 Vertex <|-- PseudoState
 PseudoState <|-- Choice
 
 ' Transition relations
-Transition *-- "0..1" Event
-Transition *-- "0..1" Guard
-Transition *-- "0..1" Action
+Transition *--> "0..1" Event
+Transition *--> "0..1" Guard
+Transition *--> "0..1" Action
 
 @enduml

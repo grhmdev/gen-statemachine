@@ -1,3 +1,10 @@
+"""
+Contains a series of 'Builder' classes which translate the tokens in the
+ParseTree into corresponding Model classes. This is done by recursively walking
+the ParseTree in a depth first manner and gradually building the StateMachine
+model.
+"""
+
 import logging
 from typing import Optional, List
 
