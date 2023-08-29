@@ -28,9 +28,9 @@ class Diagnostics:
         self.output_dir = output_dir / datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         self.output_dir.mkdir(parents=True, exist_ok=False)
         latest_dir = output_dir / "latest"
-        if latest_dir.exists():
+        if os.path.islink(latest_dir):
             latest_dir.unlink()
-        os.symlink(self.output_dir, output_dir / "latest")
+        latest_dir.symlink_to(self.output_dir.resolve(), target_is_directory=True)
         self._init_log_file()
 
     def _init_log_file(self):
