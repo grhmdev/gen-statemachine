@@ -1,5 +1,15 @@
+"""
+A manifest file is used to describe the files needed to generate a target.
+
+Currently, files in a target directory can be:
+
+- Template files, which require rendering
+- Source files, which contain source code in the target language
+- Entrypoint files, which may be used to run the final generated code
+
+"""
+
 from enum import Enum
-from importlib.metadata import EntryPoint
 from typing import List, Dict
 from pydantic import BaseModel
 import tomli

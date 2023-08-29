@@ -12,6 +12,10 @@ LOGGER = logging.getLogger(__name__)
 
 
 class MakoRenderer:
+    """
+    Renders text from Mako template files
+    """
+
     def __init__(self, template_dir: Path, statemachine_model: StateMachine):
         self.template_lookup = TemplateLookup(directories=[template_dir])
         self.statemachine = statemachine_model

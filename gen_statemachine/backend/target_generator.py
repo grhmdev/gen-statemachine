@@ -1,3 +1,12 @@
+"""
+A 'target' is a language and/or implementation to generate statemachine code
+for. The target directory should contain a manifest file which lists the files
+contained within the directory and their types.
+
+The TargetGenerator is therefore responsible for processing target files that
+are listed by the manifest and performing actions depending on the file types.
+"""
+
 import logging
 from pathlib import Path
 from gen_statemachine.error import ProgramError
@@ -14,11 +23,18 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TargetGenerator:
+    """Generates output files (typically code) for targets"""
+
     def __init__(self):
         self.targets_dir = Path(__file__).parent / "targets"
         self.generate_entrypoints = True
 
     def generate(self, target_name: str, output_dir: Path, statemachine: StateMachine):
+        """
+        Attempts to read a manifest file from the directory named `target_name`
+        and then sequentially processes all other files in the directory that
+        are listed in the manifest.
+        """
         target_dir = self.targets_dir / target_name
         target_dir = target_dir.resolve()
 
@@ -39,6 +55,16 @@ class TargetGenerator:
         output_dir: Path,
         statemachine: StateMachine,
     ):
+        """
+        Depending on the type of the TargetFile, performs actions:
+        - For a template file, the template is rendered and text output to a
+          file in the output directory
+        - For a source code file, the file is simply copied into the output dir
+          without alteration
+        - For an entrypoint file, the file is optionally copied into the output
+          dir (the same as a source file)
+        """
+
         file_path = target_dir / file.path
         if not file_path.exists():
             raise ProgramError(f"The file {file.path} does not exist! ({file_path})")
